@@ -1,6 +1,6 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism & 200+ Color Palette
--- Thấy Bố mày BÁ Khí Chưa Huy
+-- Thấy Bố Mày BÁ Khí Chưa HUY 🗿🗿🗿
 -- ================================================
 local Players       = game:GetService("Players")
 local UIS           = game:GetService("UserInputService")
@@ -1118,4 +1118,3 @@ task.spawn(function()
 end)
 
 print("[Tzuy Hub] ✅ Đã load - Nút Toggle đã thu nhỏ 1.5 lần!")
-
