@@ -1,18 +1,19 @@
 -- ================================================
--- Tzuy Hub - Glassmorphism UI & Touch Highlight Effect
--- Tzuy zZz : Ba' Khi'
+-- Tzuy Hub - Modern Glassmorphism & 200+ Color Palette
+-- Intro: "TƯ DUY BÁ KHÍ" → VỠ TAN 1600 HẠT → Menu bung ra
+-- Style: Teddy Hub Glassmorphism UI with Advanced Color Search
 -- ================================================
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local Players       = game:GetService("Players")
+local UIS           = game:GetService("UserInputService")
+local RunService    = game:GetService("RunService")
+local TweenService  = game:GetService("TweenService")
+local player        = Players.LocalPlayer
+local playerGui     = player:WaitForChild("PlayerGui")
 
--- ID ảnh nút bật/tắt (Mặt nạ đen viền xanh)
-local IMAGE_ICON = "rbxthumb://type=Asset&id=120210404674531&w=150&h=150" 
+-- ẢNH NÚT NGOÀI MÀN HÌNH
+local IMAGE_ICON = "rbxthumb://type=Asset&id=120210404674531&w=150&h=150"
 
--- Xóa GUI cũ tránh trùng lặp
+-- Xóa GUI cũ
 if playerGui:FindFirstChild("TzuyHubGui") then
     playerGui.TzuyHubGui:Destroy()
 end
@@ -24,13 +25,14 @@ screenGui.IgnoreGuiInset = true
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- ================= NÚT BẤM BÊN NGOÀI (TOGGLE BUTTON) =================
+-- ================= NÚT BẤM NGOÀI (BÊN TRÁI) =================
 local button = Instance.new("ImageButton")
 button.Name = "ToggleButton"
 button.Size = UDim2.new(0, 60, 0, 60)
-button.Position = UDim2.new(0.9, -30, 0.3, 0)
+button.Position = UDim2.new(0, 15, 0.3, 0)
 button.Image = IMAGE_ICON
 button.BackgroundTransparency = 1
+button.ImageTransparency = 0
 button.ScaleType = Enum.ScaleType.Fit
 button.ZIndex = 100
 button.Parent = screenGui
@@ -39,18 +41,19 @@ local btnStroke = Instance.new("UIStroke")
 btnStroke.Color = Color3.fromRGB(0, 170, 255)
 btnStroke.Thickness = 2
 btnStroke.Parent = button
+
 local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 12)
 btnCorner.Parent = button
 
--- ================= KHUNG MENU CHÍNH (THỦY TINH TRONG SUỐT) =================
+-- ================= KHUNG MENU CHÍNH (THỦY TINH SANG TRỌNG) =================
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.Size = UDim2.new(0, 880, 0, 540)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 28, 45) -- Màu mặc định (Thủy tinh xanh đậm)
-mainFrame.BackgroundTransparency = 0.35 -- Độ trong suốt kính mờ
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 42)
+mainFrame.BackgroundTransparency = 0.35
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.ZIndex = 50
@@ -65,60 +68,115 @@ mainCorner.Parent = mainFrame
 
 local mainStroke = Instance.new("UIStroke")
 mainStroke.Color = Color3.fromRGB(255, 255, 255)
-mainStroke.Transparency = 0.5
-mainStroke.Thickness = 1.5
+mainStroke.Transparency = 0.6
+mainStroke.Thickness = 1.2
 mainStroke.Parent = mainFrame
 
--- ================= THANH TIÊU ĐỀ (HEADER) =================
+-- ================= HEADER & SEARCH BAR =================
 local header = Instance.new("Frame")
 header.Name = "Header"
-header.Size = UDim2.new(1, 0, 0, 50)
+header.Size = UDim2.new(1, 0, 0, 55)
 header.BackgroundTransparency = 1
 header.ZIndex = 51
 header.Parent = mainFrame
 
 local titleText = Instance.new("TextLabel")
-titleText.Size = UDim2.new(0, 400, 1, 0)
+titleText.Size = UDim2.new(0, 220, 1, 0)
 titleText.Position = UDim2.new(0, 20, 0, 0)
 titleText.BackgroundTransparency = 1
-titleText.Text = "Tzuy Hub - Interactive Edition"
+titleText.Text = "Tzuy Hub"
 titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleText.Font = Enum.Font.GothamBold
-titleText.TextSize = 18
+titleText.TextSize = 20
 titleText.TextXAlignment = Enum.TextXAlignment.Left
 titleText.ZIndex = 52
 titleText.Parent = header
 
-local subTitle = Instance.new("TextLabel")
-subTitle.Size = UDim2.new(0, 300, 1, 0)
-subTitle.Position = UDim2.new(0, 320, 0, 0)
-subTitle.BackgroundTransparency = 1
-subTitle.Text = "| Premium UNC Script Hub"
-subTitle.TextColor3 = Color3.fromRGB(180, 190, 210)
-subTitle.Font = Enum.Font.Gotham
-subTitle.TextSize = 12
-subTitle.TextXAlignment = Enum.TextXAlignment.Left
-subTitle.ZIndex = 52
-subTitle.Parent = header
+-- Thanh Tìm Kiếm Tính Năng (Search Bar)
+local searchFrame = Instance.new("Frame")
+searchFrame.Name = "SearchFrame"
+searchFrame.Size = UDim2.new(0, 320, 0, 34)
+searchFrame.Position = UDim2.new(0, 235, 0.5, -17)
+searchFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+searchFrame.BackgroundTransparency = 0.88
+searchFrame.BorderSizePixel = 0
+searchFrame.ZIndex = 52
+searchFrame.Parent = header
+
+Instance.new("UICorner", searchFrame).CornerRadius = UDim.new(0, 8)
+
+local searchStroke = Instance.new("UIStroke")
+searchStroke.Color = Color3.fromRGB(255, 255, 255)
+searchStroke.Transparency = 0.8
+searchStroke.Thickness = 1
+searchStroke.Parent = searchFrame
+
+local searchIcon = Instance.new("TextLabel")
+searchIcon.Size = UDim2.new(0, 30, 1, 0)
+searchIcon.BackgroundTransparency = 1
+searchIcon.Text = "🔍"
+searchIcon.TextSize = 13
+searchIcon.ZIndex = 53
+searchIcon.Parent = searchFrame
+
+local searchBox = Instance.new("TextBox")
+searchBox.Name = "SearchBox"
+searchBox.Size = UDim2.new(1, -35, 1, 0)
+searchBox.Position = UDim2.new(0, 30, 0, 0)
+searchBox.BackgroundTransparency = 1
+searchBox.PlaceholderText = "Tìm kiếm tính năng..."
+searchBox.PlaceholderColor3 = Color3.fromRGB(160, 170, 190)
+searchBox.Text = ""
+searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+searchBox.Font = Enum.Font.Gotham
+searchBox.TextSize = 13
+searchBox.TextXAlignment = Enum.TextXAlignment.Left
+searchBox.ZIndex = 53
+searchBox.Parent = searchFrame
 
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 35, 0, 35)
-closeBtn.Position = UDim2.new(1, -45, 0.5, -17.5)
+closeBtn.Size = UDim2.new(0, 32, 0, 32)
+closeBtn.Position = UDim2.new(1, -42, 0.5, -16)
 closeBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.BackgroundTransparency = 0.8
+closeBtn.BackgroundTransparency = 0.85
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeBtn.TextSize = 16
+closeBtn.TextSize = 14
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.ZIndex = 52
 closeBtn.Parent = header
 Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
 
--- ================= SIDEBAR (DANH MỤC TRÁI) =================
+-- ================= SPLASH BÁ KHÍ =================
+local splashOverlay = Instance.new("Frame")
+splashOverlay.Name = "BaKhiOverlay"
+splashOverlay.Size = UDim2.new(1, 0, 1, 0)
+splashOverlay.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
+splashOverlay.BackgroundTransparency = 1
+splashOverlay.BorderSizePixel = 0
+splashOverlay.ZIndex = 200
+splashOverlay.Parent = screenGui
+
+local baKhiSplash = Instance.new("TextLabel")
+baKhiSplash.Name = "BaKhiText"
+baKhiSplash.Size = UDim2.new(1, 0, 0, 130)
+baKhiSplash.Position = UDim2.new(0, 0, 0.5, -65)
+baKhiSplash.BackgroundTransparency = 1
+baKhiSplash.Text = "TƯ DUY BÁ KHÍ"
+baKhiSplash.TextColor3 = Color3.fromRGB(255, 215, 0)
+baKhiSplash.Font = Enum.Font.GothamBlack
+baKhiSplash.TextSize = 60
+baKhiSplash.TextStrokeTransparency = 0.15
+baKhiSplash.TextStrokeColor3 = Color3.fromRGB(200, 50, 0)
+baKhiSplash.TextTransparency = 1
+baKhiSplash.ZIndex = 201
+baKhiSplash.Parent = screenGui
+
+-- ================= SIDEBAR =================
 local sidebar = Instance.new("ScrollingFrame")
 sidebar.Name = "Sidebar"
-sidebar.Size = UDim2.new(0, 220, 1, -65)
-sidebar.Position = UDim2.new(0, 10, 0, 55)
+sidebar.Size = UDim2.new(0, 215, 1, -65)
+sidebar.Position = UDim2.new(0, 10, 0, 60)
 sidebar.BackgroundTransparency = 1
 sidebar.BorderSizePixel = 0
 sidebar.ScrollBarThickness = 2
@@ -134,11 +192,11 @@ sidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
     sidebar.CanvasSize = UDim2.new(0, 0, 0, sidebarLayout.AbsoluteContentSize.Y + 10)
 end)
 
--- ================= CONTAINER NỘI DUNG (BÊN PHẢI) =================
+-- ================= CONTENT =================
 local contentContainer = Instance.new("Frame")
 contentContainer.Name = "ContentContainer"
-contentContainer.Size = UDim2.new(1, -245, 1, -65)
-contentContainer.Position = UDim2.new(0, 235, 0, 55)
+contentContainer.Size = UDim2.new(1, -240, 1, -65)
+contentContainer.Position = UDim2.new(0, 230, 0, 60)
 contentContainer.BackgroundTransparency = 1
 contentContainer.ZIndex = 51
 contentContainer.Parent = mainFrame
@@ -146,30 +204,31 @@ contentContainer.Parent = mainFrame
 local tabs = {}
 local tabButtons = {}
 local activeTab = nil
+local allScriptButtons = {}
 
 local function createTabContent(name)
-    local scrollingFrame = Instance.new("ScrollingFrame")
-    scrollingFrame.Name = name .. "Content"
-    scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
-    scrollingFrame.BackgroundTransparency = 1
-    scrollingFrame.BorderSizePixel = 0
-    scrollingFrame.ScrollBarThickness = 4
-    scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
-    scrollingFrame.Visible = false
-    scrollingFrame.ZIndex = 52
-    scrollingFrame.Parent = contentContainer
-    
+    local sf = Instance.new("ScrollingFrame")
+    sf.Name = name .. "Content"
+    sf.Size = UDim2.new(1, 0, 1, 0)
+    sf.BackgroundTransparency = 1
+    sf.BorderSizePixel = 0
+    sf.ScrollBarThickness = 4
+    sf.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    sf.Visible = false
+    sf.ZIndex = 52
+    sf.Parent = contentContainer
+
     local layout = Instance.new("UIListLayout")
     layout.Padding = UDim.new(0, 8)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Parent = scrollingFrame
-    
+    layout.Parent = sf
+
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
+        sf.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
     end)
-    
-    tabs[name] = scrollingFrame
-    return scrollingFrame
+
+    tabs[name] = sf
+    return sf
 end
 
 local function switchTab(name)
@@ -178,8 +237,8 @@ local function switchTab(name)
     end
     for btnName, btn in pairs(tabButtons) do
         if btnName == name then
-            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
-            btn.BackgroundTransparency = 0.2
+            btn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+            btn.BackgroundTransparency = 0.25
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
         else
             btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -202,43 +261,42 @@ local function addSidebarButton(name, iconText)
     btn.TextSize = 14
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.ZIndex = 52
-    
+
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = btn
-    
+
     btn.MouseButton1Click:Connect(function()
+        searchBox.Text = ""
         switchTab(name)
     end)
-    
+
     btn.Parent = sidebar
     tabButtons[name] = btn
     createTabContent(name)
 end
 
--- Lưu trữ danh sách các nút tính năng để quản lý hiệu ứng Active khi chạm/bấm
-local scriptButtonsPerTab = {}
-
 local function addScriptButton(tabName, title, desc, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
-    
+
     local btn = Instance.new("TextButton")
+    btn.Name = title .. "Button"
     btn.Size = UDim2.new(1, -10, 0, 52)
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     btn.BackgroundTransparency = 0.90
     btn.Text = ""
     btn.AutoButtonColor = false
     btn.ZIndex = 53
-    
+
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    
+
     local stroke = Instance.new("UIStroke")
     stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.7
+    stroke.Transparency = 0.75
     stroke.Thickness = 1
     stroke.Parent = btn
-    
+
     local tLbl = Instance.new("TextLabel")
     tLbl.Size = UDim2.new(1, -20, 0, 22)
     tLbl.Position = UDim2.new(0, 15, 0, 6)
@@ -250,7 +308,7 @@ local function addScriptButton(tabName, title, desc, callback)
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
     tLbl.ZIndex = 54
     tLbl.Parent = btn
-    
+
     local dLbl = Instance.new("TextLabel")
     dLbl.Size = UDim2.new(1, -20, 0, 18)
     dLbl.Position = UDim2.new(0, 15, 0, 26)
@@ -262,44 +320,366 @@ local function addScriptButton(tabName, title, desc, callback)
     dLbl.TextXAlignment = Enum.TextXAlignment.Left
     dLbl.ZIndex = 54
     dLbl.Parent = btn
-    
-    if not scriptButtonsPerTab[tabName] then
-        scriptButtonsPerTab[tabName] = {}
-    end
-    table.insert(scriptButtonsPerTab[tabName], {Button = btn, Stroke = stroke})
-    
-    -- Hiệu ứng khi chạm/bấm vào tính năng (Active Highlight State)
+
+    local itemData = {
+        Button = btn,
+        Stroke = stroke,
+        Title = string.lower(title),
+        Desc = string.lower(desc),
+        TabName = tabName
+    }
+    table.insert(allScriptButtons, itemData)
+
     btn.MouseButton1Click:Connect(function()
-        -- Reset hiệu ứng của các nút khác trong cùng tab
-        for _, item in ipairs(scriptButtonsPerTab[tabName]) do
-            TweenService:Create(item.Button, TweenInfo.new(0.2), {
-                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                BackgroundTransparency = 0.90
-            }):Play()
-            TweenService:Create(item.Stroke, TweenInfo.new(0.2), {
-                Transparency = 0.7
-            }):Play()
+        for _, item in ipairs(allScriptButtons) do
+            if item.TabName == tabName then
+                TweenService:Create(item.Button, TweenInfo.new(0.2), {
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                    BackgroundTransparency = 0.90
+                }):Play()
+                TweenService:Create(item.Stroke, TweenInfo.new(0.2), {
+                    Transparency = 0.75
+                }):Play()
+            end
         end
-        
-        -- Làm nổi bật nút được chạm vào (Active Blue Highlight)
         TweenService:Create(btn, TweenInfo.new(0.2), {
             BackgroundColor3 = Color3.fromRGB(0, 140, 255),
-            BackgroundTransparency = 0.15
+            BackgroundTransparency = 0.20
         }):Play()
         TweenService:Create(stroke, TweenInfo.new(0.2), {
             Transparency = 0.1
         }):Play()
-        
-        -- Thực thi callback tính năng
         callback()
     end)
-    
+
     btn.Parent = tabFrame
 end
 
--- ================= TẠO CÁC NHÓM & TÍNH NĂNG =================
+-- ================= DANH SÁCH 200+ MÀU THỦY TINH ĐẦY ĐỦ =================
+local masterGlassColors = {
+    -- 1. Trong suốt / không màu
+    {"Trong suốt – Clear", Color3.fromRGB(30, 35, 45), 0.6},
+    {"Pha lê – Crystal", Color3.fromRGB(240, 245, 255), 0.5},
+    {"Nước trong – Water Clear", Color3.fromRGB(200, 230, 255), 0.55},
+    {"Băng trong – Ice Clear", Color3.fromRGB(210, 240, 255), 0.5},
+    {"Ánh xanh nhẹ – Clear Aqua", Color3.fromRGB(180, 240, 220), 0.55},
+    {"Ánh xám nhẹ – Clear Smoke", Color3.fromRGB(80, 85, 95), 0.5},
+    {"Ánh vàng nhẹ – Clear Straw", Color3.fromRGB(250, 240, 190), 0.55},
+    {"Siêu trong – Ultra Clear", Color3.fromRGB(255, 255, 255), 0.7},
+    {"Quang học – Optical Clear", Color3.fromRGB(230, 240, 250), 0.65},
 
--- 1. Nhóm Blox Fruits
+    -- 2. Trắng / đục / sữa
+    {"Trắng sữa – Milk White", Color3.fromRGB(245, 245, 250), 0.25},
+    {"Trắng opal – Opal White", Color3.fromRGB(235, 240, 245), 0.3},
+    {"Trắng tuyết – Snow White", Color3.fromRGB(255, 255, 255), 0.2},
+    {"Trắng ngà – Ivory", Color3.fromRGB(250, 245, 230), 0.3},
+    {"Kem – Cream", Color3.fromRGB(245, 235, 210), 0.3},
+    {"Xương – Bone", Color3.fromRGB(230, 225, 210), 0.3},
+    {"Ngọc trai trắng – Pearl White", Color3.fromRGB(240, 235, 245), 0.25},
+    {"Thạch cao – Alabaster", Color3.fromRGB(240, 240, 235), 0.2},
+    {"Trắng mờ – Frosted White", Color3.fromRGB(220, 225, 235), 0.45},
+    {"Trắng satin – Satin White", Color3.fromRGB(230, 230, 240), 0.35},
+    {"Trắng phấn – Chalk White", Color3.fromRGB(240, 240, 240), 0.15},
+
+    -- 3. Xám / đen
+    {"Xám khói – Smoke Grey", Color3.fromRGB(70, 75, 85), 0.4},
+    {"Xám tro – Ash Grey", Color3.fromRGB(110, 115, 120), 0.4},
+    {"Xám bão – Storm Grey", Color3.fromRGB(80, 90, 100), 0.35},
+    {"Xám bê tông – Concrete Grey", Color3.fromRGB(120, 125, 130), 0.3},
+    {"Xám thép – Steel Grey", Color3.fromRGB(90, 100, 110), 0.35},
+    {"Xám xanh – Blue Grey", Color3.fromRGB(70, 85, 105), 0.35},
+    {"Xám xanh rêu – Slate Grey", Color3.fromRGB(60, 75, 80), 0.35},
+    {"Than chì – Charcoal", Color3.fromRGB(40, 45, 50), 0.3},
+    {"Graphite", Color3.fromRGB(50, 50, 55), 0.35},
+    {"Gunmetal", Color3.fromRGB(45, 55, 60), 0.35},
+    {"Đen – Black", Color3.fromRGB(10, 10, 12), 0.3},
+    {"Đen obsidian – Obsidian", Color3.fromRGB(18, 18, 22), 0.25},
+    {"Đen onyx – Onyx", Color3.fromRGB(15, 15, 18), 0.35},
+    {"Đen jet – Jet Black", Color3.fromRGB(5, 5, 5), 0.2},
+    {"Đen xanh – Blue Black", Color3.fromRGB(10, 18, 30), 0.35},
+    {"Đen nâu – Brown Black", Color3.fromRGB(25, 18, 15), 0.35},
+    {"Đen mờ – Frosted Black", Color3.fromRGB(30, 30, 35), 0.5},
+
+    -- 4. Xanh dương
+    {"Xanh da trời – Sky Blue", Color3.fromRGB(115, 185, 255), 0.35},
+    {"Xanh bột – Powder Blue", Color3.fromRGB(175, 210, 240), 0.35},
+    {"Xanh em bé – Baby Blue", Color3.fromRGB(150, 205, 255), 0.35},
+    {"Xanh băng – Ice Blue", Color3.fromRGB(180, 225, 255), 0.4},
+    {"Xanh sông băng – Glacier Blue", Color3.fromRGB(130, 200, 230), 0.35},
+    {"Xanh nhạt – Pale Blue", Color3.fromRGB(190, 215, 240), 0.4},
+    {"Xanh ngô – Cornflower Blue", Color3.fromRGB(100, 145, 235), 0.35},
+    {"Periwinkle", Color3.fromRGB(140, 150, 230), 0.35},
+    {"Azure", Color3.fromRGB(0, 125, 255), 0.35},
+    {"Cerulean", Color3.fromRGB(40, 150, 215), 0.35},
+    {"Xanh cobalt – Cobalt Blue", Color3.fromRGB(15, 45, 180), 0.35},
+    {"Xanh sapphire – Sapphire", Color3.fromRGB(20, 50, 160), 0.35},
+    {"Xanh hoàng gia – Royal Blue", Color3.fromRGB(30, 70, 210), 0.35},
+    {"Xanh navy – Navy Blue", Color3.fromRGB(15, 25, 80), 0.3},
+    {"Chàm – Indigo", Color3.fromRGB(55, 25, 110), 0.35},
+    {"Xanh nửa đêm – Midnight Blue", Color3.fromRGB(10, 18, 50), 0.3},
+    {"Xanh điện – Electric Blue", Color3.fromRGB(0, 180, 255), 0.35},
+    {"Xanh biển sâu – Ocean Blue", Color3.fromRGB(20, 85, 155), 0.35},
+    {"Xanh denim – Denim Blue", Color3.fromRGB(70, 100, 145), 0.35},
+    {"Xanh bụi – Dusty Blue", Color3.fromRGB(120, 145, 170), 0.35},
+    {"Xanh thép – Steel Blue", Color3.fromRGB(70, 120, 170), 0.35},
+    {"Xanh lagune – Lagoon", Color3.fromRGB(20, 145, 175), 0.35},
+    {"Xanh Caribbean", Color3.fromRGB(0, 175, 200), 0.35},
+    {"Xanh peacock – Peacock Blue", Color3.fromRGB(10, 105, 145), 0.35},
+    {"Xanh thủy – Aqua Blue", Color3.fromRGB(0, 200, 235), 0.35},
+
+    -- 5. Xanh ngọc / teal / turquoise
+    {"Xanh ngọc – Jade", Color3.fromRGB(0, 168, 107), 0.35},
+    {"Ngọc bích – Emerald", Color3.fromRGB(8, 143, 78), 0.35},
+    {"Xanh biển – Sea Green", Color3.fromRGB(46, 139, 87), 0.35},
+    {"Xanh thủy tinh biển – Sea Glass", Color3.fromRGB(120, 190, 170), 0.4},
+    {"Xanh mint – Mint", Color3.fromRGB(150, 230, 180), 0.35},
+    {"Xanh bọt biển – Seafoam", Color3.fromRGB(160, 225, 200), 0.35},
+    {"Xanh turquoise – Turquoise", Color3.fromRGB(64, 224, 208), 0.35},
+    {"Xanh teal – Teal", Color3.fromRGB(0, 128, 128), 0.35},
+    {"Xanh cyan – Cyan", Color3.fromRGB(0, 230, 255), 0.35},
+    {"Xanh petrol – Petrol", Color3.fromRGB(10, 80, 95), 0.3},
+    {"Xanh marine – Marine", Color3.fromRGB(15, 95, 120), 0.35},
+    {"Xanh aquamarine – Aquamarine", Color3.fromRGB(125, 240, 215), 0.4},
+    {"Xanh malachite – Malachite", Color3.fromRGB(18, 170, 80), 0.35},
+
+    -- 6. Xanh lá
+    {"Xanh lá nhạt – Pale Green", Color3.fromRGB(160, 230, 160), 0.35},
+    {"Xanh sage – Sage", Color3.fromRGB(135, 160, 130), 0.35},
+    {"Xanh celadon – Celadon", Color3.fromRGB(170, 200, 170), 0.4},
+    {"Xanh rêu – Moss Green", Color3.fromRGB(90, 120, 70), 0.35},
+    {"Xanh ô liu – Olive", Color3.fromRGB(110, 115, 45), 0.35},
+    {"Xanh cỏ – Grass Green", Color3.fromRGB(80, 180, 60), 0.35},
+    {"Xanh táo – Apple Green", Color3.fromRGB(140, 210, 60), 0.35},
+    {"Xanh lime – Lime", Color3.fromRGB(180, 240, 30), 0.35},
+    {"Xanh chanh – Chartreuse", Color3.fromRGB(200, 240, 0), 0.35},
+    {"Xanh lá cây – Forest Green", Color3.fromRGB(35, 100, 45), 0.3},
+    {"Xanh thông – Pine Green", Color3.fromRGB(15, 80, 40), 0.3},
+    {"Xanh lá đậm – Dark Green", Color3.fromRGB(10, 60, 25), 0.3},
+
+    -- 7. Tím / hồng tím
+    {"Tím oải hương – Lavender", Color3.fromRGB(180, 160, 230), 0.35},
+    {"Tím lilac – Lilac", Color3.fromRGB(200, 160, 220), 0.35},
+    {"Tím violet – Violet", Color3.fromRGB(140, 30, 220), 0.35},
+    {"Tím thạch anh – Amethyst", Color3.fromRGB(150, 80, 200), 0.35},
+    {"Tím – Purple", Color3.fromRGB(125, 30, 180), 0.35},
+    {"Tím mận – Plum", Color3.fromRGB(100, 30, 90), 0.35},
+    {"Tím orchid – Orchid", Color3.fromRGB(210, 110, 210), 0.35},
+    {"Tím nho – Grape", Color3.fromRGB(90, 30, 120), 0.35},
+    {"Tím cà – Aubergine", Color3.fromRGB(60, 20, 60), 0.3},
+
+    -- 8. Hồng / đỏ
+    {"Hồng phấn – Pink", Color3.fromRGB(255, 180, 200), 0.35},
+    {"Hồng rose – Rose", Color3.fromRGB(240, 120, 150), 0.35},
+    {"Hồng blush – Blush", Color3.fromRGB(255, 200, 200), 0.35},
+    {"Hồng san hô – Coral Pink", Color3.fromRGB(255, 130, 130), 0.35},
+    {"Hồng fuchsia – Fuchsia", Color3.fromRGB(240, 20, 150), 0.35},
+    {"Hồng magenta – Magenta", Color3.fromRGB(255, 0, 140), 0.35},
+    {"Đỏ ruby – Ruby", Color3.fromRGB(220, 20, 60), 0.35},
+    {"Đỏ crimson – Crimson", Color3.fromRGB(180, 10, 40), 0.35},
+    {"Đỏ scarlet – Scarlet", Color3.fromRGB(230, 30, 30), 0.35},
+    {"Đỏ anh đào – Cherry Red", Color3.fromRGB(200, 0, 40), 0.35},
+    {"Đỏ burgundy – Burgundy", Color3.fromRGB(110, 15, 30), 0.3},
+    {"Đỏ rượu – Wine", Color3.fromRGB(120, 20, 40), 0.3},
+    {"Đỏ máu – Blood Red", Color3.fromRGB(140, 0, 0), 0.3},
+
+    -- 9. Cam / vàng / mật ong
+    {"Hổ phách – Amber", Color3.fromRGB(255, 160, 0), 0.35},
+    {"Mật ong – Honey", Color3.fromRGB(235, 175, 40), 0.35},
+    {"Vàng gold – Golden", Color3.fromRGB(255, 200, 30), 0.35},
+    {"Vàng – Yellow", Color3.fromRGB(255, 230, 0), 0.35},
+    {"Vàng chanh – Lemon", Color3.fromRGB(255, 240, 80), 0.35},
+    {"Vàng citrine – Citrine", Color3.fromRGB(230, 200, 50), 0.35},
+    {"Vàng champagne – Champagne", Color3.fromRGB(245, 225, 180), 0.4},
+    {"Cam – Orange", Color3.fromRGB(255, 120, 0), 0.35},
+    {"Cam quýt – Tangerine", Color3.fromRGB(255, 100, 0), 0.35},
+    {"Cam đào – Peach Orange", Color3.fromRGB(255, 160, 110), 0.35},
+    {"Đồng – Copper", Color3.fromRGB(185, 100, 50), 0.35},
+
+    -- 10. Nâu / trà / caramel
+    {"Nâu hổ phách – Amber Brown", Color3.fromRGB(150, 90, 20), 0.35},
+    {"Nâu – Brown", Color3.fromRGB(120, 70, 30), 0.35},
+    {"Sô cô la – Chocolate", Color3.fromRGB(80, 45, 20), 0.3},
+    {"Cà phê – Coffee", Color3.fromRGB(70, 40, 25), 0.3},
+    {"Caramel", Color3.fromRGB(190, 120, 50), 0.35},
+    {"Trà – Tea", Color3.fromRGB(170, 120, 60), 0.4},
+
+    -- 11. Thương mại & Phát quang đặc biệt
+    {"Uranium Glass – Xanh Phát Quang", Color3.fromRGB(120, 255, 40), 0.35},
+    {"Vaseline Glass – Vàng Xanh Phát Quang", Color3.fromRGB(180, 255, 30), 0.35},
+    {"Depression Glass – Hồng Ánh Kim", Color3.fromRGB(255, 150, 180), 0.4},
+    {"Jadeite / Jadite – Xanh Ngọc Sữa", Color3.fromRGB(160, 220, 180), 0.25},
+    {"Moonstone – Trắng Ánh Xanh", Color3.fromRGB(210, 230, 255), 0.35},
+    {"Cobalt Blue – Xanh Cobalt Đậm", Color3.fromRGB(10, 30, 150), 0.3},
+    {"Carnival Glass – Ánh Cầu Vồng", Color3.fromRGB(160, 100, 200), 0.35}
+}
+
+-- ================= DROPDOWN MÀU THỦY TINH CÓ Ô TÌM KIẾM =================
+local function createGlassDropdown(tabName)
+    local tabFrame = tabs[tabName]
+    if not tabFrame then return end
+
+    local dropdownFrame = Instance.new("Frame")
+    dropdownFrame.Name = "GlassColorDropdown"
+    dropdownFrame.Size = UDim2.new(1, -10, 0, 50)
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    dropdownFrame.BackgroundTransparency = 0.90
+    dropdownFrame.ClipsDescendants = true
+    dropdownFrame.ZIndex = 60
+    dropdownFrame.Parent = tabFrame
+
+    Instance.new("UICorner", dropdownFrame).CornerRadius = UDim.new(0, 10)
+    local dStroke = Instance.new("UIStroke")
+    dStroke.Color = Color3.fromRGB(255, 255, 255)
+    dStroke.Transparency = 0.75
+    dStroke.Parent = dropdownFrame
+
+    local headerBtn = Instance.new("TextButton")
+    headerBtn.Size = UDim2.new(1, 0, 0, 50)
+    headerBtn.BackgroundTransparency = 1
+    headerBtn.Text = ""
+    headerBtn.ZIndex = 61
+    headerBtn.Parent = dropdownFrame
+
+    local titleLbl = Instance.new("TextLabel")
+    titleLbl.Size = UDim2.new(0, 220, 1, 0)
+    titleLbl.Position = UDim2.new(0, 15, 0, 0)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Text = "Bộ Màu Thủy Tinh (200+ Colors)"
+    titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleLbl.Font = Enum.Font.GothamBold
+    titleLbl.TextSize = 14
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    titleLbl.ZIndex = 62
+    titleLbl.Parent = headerBtn
+
+    local selectedLbl = Instance.new("TextLabel")
+    selectedLbl.Size = UDim2.new(0, 250, 1, 0)
+    selectedLbl.Position = UDim2.new(1, -260, 0, 0)
+    selectedLbl.BackgroundTransparency = 1
+    selectedLbl.Text = "Xanh Đậm (Default) ▾"
+    selectedLbl.TextColor3 = Color3.fromRGB(0, 170, 255)
+    selectedLbl.Font = Enum.Font.GothamMedium
+    selectedLbl.TextSize = 13
+    selectedLbl.TextXAlignment = Enum.TextXAlignment.Right
+    selectedLbl.ZIndex = 62
+    selectedLbl.Parent = headerBtn
+
+    -- Thanh tìm kiếm màu trong Dropdown
+    local colorSearchBox = Instance.new("TextBox")
+    colorSearchBox.Name = "ColorSearchBox"
+    colorSearchBox.Size = UDim2.new(1, -30, 0, 32)
+    colorSearchBox.Position = UDim2.new(0, 15, 0, 55)
+    colorSearchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    colorSearchBox.BackgroundTransparency = 0.88
+    colorSearchBox.PlaceholderText = "🔎 Nhập tên màu thủy tinh để tìm..."
+    colorSearchBox.PlaceholderColor3 = Color3.fromRGB(160, 170, 190)
+    colorSearchBox.Text = ""
+    colorSearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    colorSearchBox.Font = Enum.Font.Gotham
+    colorSearchBox.TextSize = 12
+    colorSearchBox.ZIndex = 62
+    colorSearchBox.Parent = dropdownFrame
+
+    Instance.new("UICorner", colorSearchBox).CornerRadius = UDim.new(0, 6)
+
+    -- Khung cuộn chứa danh sách màu
+    local optionContainer = Instance.new("ScrollingFrame")
+    optionContainer.Size = UDim2.new(1, -30, 0, 210)
+    optionContainer.Position = UDim2.new(0, 15, 0, 95)
+    optionContainer.BackgroundTransparency = 1
+    optionContainer.BorderSizePixel = 0
+    optionContainer.ScrollBarThickness = 3
+    optionContainer.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    optionContainer.ZIndex = 62
+    optionContainer.Parent = dropdownFrame
+
+    local optLayout = Instance.new("UIListLayout")
+    optLayout.Padding = UDim.new(0, 4)
+    optLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    optLayout.Parent = optionContainer
+
+    optLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        optionContainer.CanvasSize = UDim2.new(0, 0, 0, optLayout.AbsoluteContentSize.Y + 10)
+    end)
+
+    local isOpen = false
+    headerBtn.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        TweenService:Create(dropdownFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+            Size = isOpen and UDim2.new(1, -10, 0, 320) or UDim2.new(1, -10, 0, 50)
+        }):Play()
+    end)
+
+    local createdColorButtons = {}
+
+    for index, colorData in ipairs(masterGlassColors) do
+        local optBtn = Instance.new("TextButton")
+        optBtn.Size = UDim2.new(1, -5, 0, 32)
+        optBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        optBtn.BackgroundTransparency = 0.92
+        optBtn.Text = "  " .. colorData[1]
+        optBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+        optBtn.Font = Enum.Font.Gotham
+        optBtn.TextSize = 12
+        optBtn.TextXAlignment = Enum.TextXAlignment.Left
+        optBtn.ZIndex = 63
+        optBtn.Parent = optionContainer
+
+        Instance.new("UICorner", optBtn).CornerRadius = UDim.new(0, 6)
+
+        -- Hiển thị ô màu nhỏ minh họa
+        local colorPreview = Instance.new("Frame")
+        colorPreview.Size = UDim2.new(0, 16, 0, 16)
+        colorPreview.Position = UDim2.new(1, -24, 0.5, -8)
+        colorPreview.BackgroundColor3 = colorData[2]
+        colorPreview.BorderSizePixel = 0
+        colorPreview.ZIndex = 64
+        colorPreview.Parent = optBtn
+        Instance.new("UICorner", colorPreview).CornerRadius = UDim.new(0, 4)
+
+        table.insert(createdColorButtons, {Button = optBtn, Name = string.lower(colorData[1])})
+
+        optBtn.MouseButton1Click:Connect(function()
+            selectedLbl.Text = colorData[1] .. " ▾"
+            mainFrame.BackgroundColor3 = colorData[2]
+            mainFrame.BackgroundTransparency = colorData[3] or 0.35
+            isOpen = false
+            TweenService:Create(dropdownFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                Size = UDim2.new(1, -10, 0, 50)
+            }):Play()
+        end)
+    end
+
+    -- Tìm kiếm màu trực tiếp
+    colorSearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        local filter = string.lower(colorSearchBox.Text)
+        for _, item in ipairs(createdColorButtons) do
+            if filter == "" or string.find(item.Name, filter) then
+                item.Button.Visible = true
+            else
+                item.Button.Visible = false
+            end
+        end
+    end)
+end
+
+-- ================= LOGIC TÌM KIẾM HÀM =================
+searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local query = string.lower(searchBox.Text)
+    for _, item in ipairs(allScriptButtons) do
+        if query == "" then
+            item.Button.Visible = true
+        else
+            if string.find(item.Title, query) or string.find(item.Desc, query) then
+                item.Button.Visible = true
+            else
+                item.Button.Visible = false
+            end
+        end
+    end
+end)
+
+-- ================= NHÓM CHỨC NĂNG =================
 addSidebarButton("Blox Fruits", "⚔️")
 addScriptButton("Blox Fruits", "Redz Hub", "Script hỗ trợ Auto Farm, Sea Events, Quests mạnh mẽ.", function()
     pcall(function()
@@ -312,11 +692,11 @@ addScriptButton("Blox Fruits", "RealKid (Blox Fruits)", "Script RealKid chuyên 
     end)
 end)
 
--- 2. Nhóm Auto Hop (BF)
 addSidebarButton("Auto Hop (BF)", "🌐")
 addScriptButton("Auto Hop (BF)", "Teddy Hop", "Tự động đổi server tìm kiếm mục tiêu nhanh chóng.", function()
     pcall(function()
-        loadstring("repeat task.wait() until game:IsLoaded() loadstring(game:HttpGet(\"https://raw.githubusercontent.com/Dex-Bear/VxezeHubLoader/refs/heads/main/MainHub.lua\"))()")()
+        repeat task.wait() until game:IsLoaded() and game:GetService("Players") and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/HopBoss.lua"))()
     end)
 end)
 addScriptButton("Auto Hop (BF)", "RealKid Hop", "Script Auto Hop tối ưu hóa từ RealKid.", function()
@@ -325,9 +705,8 @@ addScriptButton("Auto Hop (BF)", "RealKid Hop", "Script Auto Hop tối ưu hóa 
     end)
 end)
 
--- 3. Nhóm Steal An Egg
 addSidebarButton("Steal An Egg", "🥚")
-addScriptButton("Steal An Egg", "RealKid", "Tự động hóa nhiệm vụ và thu thập trứng trong Steal An Egg.", function()
+addScriptButton("Steal An Egg", "RealKid", "Tự động hóa nhiệm vụ và thu thập trứng.", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))()
     end)
@@ -342,40 +721,26 @@ addScriptButton("Steal An Egg", "Night Hub", "Night Hub hỗ trợ đầy đủ 
         loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))()
     end)
 end)
-addScriptButton("Steal An Egg", "Chill x Venyx v7", "Giao diện Venyx v7 việt hóa Premium mới nhất cho Steal An Egg.", function()
+addScriptButton("Steal An Egg", "Chill x Venyx v7", "Giao diện Venyx v7 việt hóa Premium.", function()
     pcall(function()
         loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-x-venyx-viet-hoa-premium-v7-pro"))()
     end)
 end)
 
--- 4. Nhóm Settings & General (Có bộ đổi màu kính thủy tinh)
 addSidebarButton("Settings & General", "⚙️")
+createGlassDropdown("Settings & General")
 
-addScriptButton("Settings & General", "Đổi màu Thủy tinh: Xanh Đậm (Default)", "Chuyển giao diện kính mờ sang tông Xanh Đậm sang trọng.", function()
-    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 28, 45)
-end)
-addScriptButton("Settings & General", "Đổi màu Thủy tinh: Tím Huyền Bí", "Chuyển giao diện kính mờ sang tông Tím khói độc đáo.", function()
-    mainFrame.BackgroundColor3 = Color3.fromRGB(45, 20, 45)
-end)
-addScriptButton("Settings & General", "Đổi màu Thủy tinh: Đen Tối Giản (Onyx)", "Chuyển giao diện kính mờ sang tông Đen huyền bí.", function()
-    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-end)
-addScriptButton("Settings & General", "Đổi màu Thủy tinh: Xanh Ngọc (Emerald)", "Chuyển giao diện kính mờ sang tông Xanh ngọc lục bảo.", function()
-    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 40, 30)
-end)
-
-addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP, v.v.)", function()
+addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP).", function()
     pcall(function()
         loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
     end)
 end)
-addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel kiểm tra và chỉnh sửa cấu trúc game.", function()
+addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))()
     end)
 end)
 
--- Noclip Toggle
 local noclipActive = false
 RunService.Stepped:Connect(function()
     if noclipActive and player.Character then
@@ -388,18 +753,21 @@ addScriptButton("Settings & General", "Toggle Noclip", "Bật/Tắt chế độ 
     noclipActive = not noclipActive
 end)
 
--- Chọn sẵn tab đầu tiên khi mở Hub
 switchTab("Blox Fruits")
 
--- ================= LOGIC KÉO THẢ & RESPONSIVE =================
+-- ================= RESPONSIVE =================
+local isAnimating = false
+local baseScale = 1
+
 local function updateScale()
     local vp = workspace.CurrentCamera.ViewportSize
-    uiScale.Scale = math.min(vp.X / 950, vp.Y / 600)
+    baseScale = math.min(vp.X / 950, vp.Y / 600)
+    if not isAnimating then uiScale.Scale = baseScale end
 end
 updateScale()
 workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 
--- Kéo thả Menu
+-- ================= DRAG =================
 local menuDragging, menuDragStart, menuStartPos
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -409,7 +777,6 @@ header.InputBegan:Connect(function(input)
     end
 end)
 
--- Kéo thả Nút bấm ngoài màn hình
 local btnDragging, btnDragStart, btnStartPos, wasDragged = false, nil, nil, false
 button.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -424,7 +791,12 @@ UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         if menuDragging then
             local delta = input.Position - menuDragStart
-            mainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+            local newX = menuStartPos.X.Offset + delta.X
+            local newY = menuStartPos.Y.Offset + delta.Y
+            local vp   = workspace.CurrentCamera.ViewportSize
+            newX = math.clamp(newX, -mainFrame.AbsoluteSize.X / 2 + 100, vp.X - 100)
+            newY = math.clamp(newY, -mainFrame.AbsoluteSize.Y / 2 + 50,  vp.Y - 50)
+            mainFrame.Position = UDim2.new(menuStartPos.X.Scale, newX, menuStartPos.Y.Scale, newY)
         end
         if btnDragging then
             local delta = input.Position - btnDragStart
@@ -441,11 +813,174 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
+-- ================= SPLASH =================
+local function playBaKhiSplash()
+    baKhiSplash.TextTransparency = 1
+    baKhiSplash.TextSize = 20
+    TweenService:Create(baKhiSplash, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        TextTransparency = 0,
+        TextSize = 60
+    }):Play()
+end
+
+-- ================= VỠ TAN 1600 HẠT (SLOW ×3, TỎA TOÀN MÀN HÌNH) =================
+local function shatterText()
+    baKhiSplash.TextTransparency = 1
+
+    local flash = Instance.new("Frame")
+    flash.Size = UDim2.new(1, 0, 1, 0)
+    flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    flash.BackgroundTransparency = 0.25
+    flash.BorderSizePixel = 0
+    flash.ZIndex = 201
+    flash.Parent = screenGui
+    TweenService:Create(flash, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    }):Play()
+    task.delay(0.4, function() if flash and flash.Parent then flash:Destroy() end end)
+
+    splashOverlay.BackgroundTransparency = 0.9
+    TweenService:Create(splashOverlay, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    }):Play()
+
+    local PARTICLE_COUNT = 1600
+    local BATCHES = 4
+    local perBatch = PARTICLE_COUNT / BATCHES
+
+    local vp = workspace.CurrentCamera.ViewportSize
+    local MAX_DISTANCE = math.sqrt(vp.X * vp.X + vp.Y * vp.Y) * 0.5
+
+    for b = 1, BATCHES do
+        task.delay((b - 1) * 0.05, function()
+            for i = 1, perBatch do
+                local p = Instance.new("Frame")
+                p.AnchorPoint = Vector2.new(0.5, 0.5)
+                local size = math.random(1, 3)
+                p.Size = UDim2.new(0, size, 0, size)
+                p.Position = UDim2.new(
+                    0.5, math.random(-380, 380),
+                    0.5, math.random(-70, 70)
+                )
+
+                local roll = math.random()
+                local color
+                if roll < 0.55 then
+                    color = Color3.fromRGB(255, math.random(190, 245), math.random(0, 80))
+                elseif roll < 0.78 then
+                    color = Color3.fromRGB(255, math.random(100, 170), 0)
+                elseif roll < 0.92 then
+                    color = Color3.fromRGB(255, 240, 200)
+                else
+                    color = Color3.fromRGB(255, math.random(60, 120), 0)
+                end
+                p.BackgroundColor3 = color
+                p.BackgroundTransparency = 0
+                p.BorderSizePixel = 0
+                p.ZIndex = 202
+                p.Parent = screenGui
+                Instance.new("UICorner", p).CornerRadius = UDim.new(1, 0)
+
+                local angle    = math.random() * math.pi * 2
+                local distance = math.random(220, math.floor(MAX_DISTANCE))
+                local dx = math.cos(angle) * distance
+                local dy = math.sin(angle) * distance
+                if math.random() < 0.40 then
+                    dy = dy + math.random(100, 500)
+                end
+
+                local dur  = math.random(180, 510) / 100
+                local ease = (math.random() < 0.5) and Enum.EasingStyle.Quad or Enum.EasingStyle.Quart
+
+                TweenService:Create(p, TweenInfo.new(dur, ease, Enum.EasingDirection.Out), {
+                    Position               = UDim2.new(0.5, dx, 0.5, dy),
+                    BackgroundTransparency = 1,
+                    Size                   = UDim2.new(0, 1, 0, 1)
+                }):Play()
+
+                task.delay(dur + 0.2, function()
+                    if p and p.Parent then p:Destroy() end
+                end)
+            end
+        end)
+    end
+
+    task.delay(6, function()
+        if splashOverlay and splashOverlay.Parent then splashOverlay:Destroy() end
+        if baKhiSplash  and baKhiSplash.Parent  then baKhiSplash:Destroy()  end
+    end)
+end
+
+-- ================= MỞ / ĐÓNG MENU =================
+local function showMenu()
+    mainFrame.Visible = true
+    isAnimating = true
+    uiScale.Scale = baseScale * 0.65
+    mainFrame.BackgroundTransparency = 1
+    mainStroke.Transparency = 1
+
+    TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Scale = baseScale
+    }):Play()
+    TweenService:Create(mainFrame, TweenInfo.new(0.3), {
+        BackgroundTransparency = 0.35
+    }):Play()
+    TweenService:Create(mainStroke, TweenInfo.new(0.3), {
+        Transparency = 0.6
+    }):Play()
+
+    button.Visible = true
+    button.ImageTransparency = 0
+
+    task.delay(0.4, function() isAnimating = false end)
+end
+
+local function hideMenu()
+    isAnimating = true
+    TweenService:Create(uiScale, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        Scale = baseScale * 0.6
+    }):Play()
+    TweenService:Create(mainFrame, TweenInfo.new(0.25), {
+        BackgroundTransparency = 1
+    }):Play()
+    TweenService:Create(mainStroke, TweenInfo.new(0.25), {
+        Transparency = 1
+    }):Play()
+
+    button.Visible = true
+    button.ImageTransparency = 0
+
+    task.delay(0.25, function()
+        mainFrame.Visible = false
+        uiScale.Scale = baseScale
+        isAnimating = false
+    end)
+end
+
+-- ================= SỰ KIỆN =================
+local introActive = true
+
 button.MouseButton1Click:Connect(function()
     if wasDragged then wasDragged = false; return end
-    mainFrame.Visible = not mainFrame.Visible
+    introActive = false
+    if mainFrame.Visible then hideMenu() else showMenu() end
 end)
 
 closeBtn.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
+    hideMenu()
 end)
+
+-- ================= INTRO =================
+task.spawn(function()
+    task.wait(0.3)
+    if not introActive then return end
+    playBaKhiSplash()
+    task.wait(1.3)
+    if not introActive then return end
+    shatterText()
+    task.wait(0.9)
+    introActive = false
+    if not mainFrame.Visible then showMenu() end
+end)
+
+print("[Tzuy Hub] ✅ Đã load - Tích hợp 200+ màu thủy tinh & Live Color Search Engine")
