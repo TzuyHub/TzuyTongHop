@@ -1,1 +1,451 @@
+-- ================================================
+-- Tzuy Hub - Glassmorphism UI & Touch Highlight Effect
+-- Tzuy zZz : Ba' Khi'
+-- ================================================
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
+-- ID ảnh nút bật/tắt (Mặt nạ đen viền xanh)
+local IMAGE_ICON = "rbxthumb://type=Asset&id=120210404674531&w=150&h=150" 
+
+-- Xóa GUI cũ tránh trùng lặp
+if playerGui:FindFirstChild("TzuyHubGui") then
+    playerGui.TzuyHubGui:Destroy()
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TzuyHubGui"
+screenGui.ResetOnSpawn = false
+screenGui.IgnoreGuiInset = true
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
+
+-- ================= NÚT BẤM BÊN NGOÀI (TOGGLE BUTTON) =================
+local button = Instance.new("ImageButton")
+button.Name = "ToggleButton"
+button.Size = UDim2.new(0, 60, 0, 60)
+button.Position = UDim2.new(0.9, -30, 0.3, 0)
+button.Image = IMAGE_ICON
+button.BackgroundTransparency = 1
+button.ScaleType = Enum.ScaleType.Fit
+button.ZIndex = 100
+button.Parent = screenGui
+
+local btnStroke = Instance.new("UIStroke")
+btnStroke.Color = Color3.fromRGB(0, 170, 255)
+btnStroke.Thickness = 2
+btnStroke.Parent = button
+local btnCorner = Instance.new("UICorner")
+btnCorner.CornerRadius = UDim.new(0, 12)
+btnCorner.Parent = button
+
+-- ================= KHUNG MENU CHÍNH (THỦY TINH TRONG SUỐT) =================
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.Size = UDim2.new(0, 880, 0, 540)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 28, 45) -- Màu mặc định (Thủy tinh xanh đậm)
+mainFrame.BackgroundTransparency = 0.35 -- Độ trong suốt kính mờ
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false
+mainFrame.ZIndex = 50
+mainFrame.Parent = screenGui
+
+local uiScale = Instance.new("UIScale")
+uiScale.Parent = mainFrame
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 16)
+mainCorner.Parent = mainFrame
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(255, 255, 255)
+mainStroke.Transparency = 0.5
+mainStroke.Thickness = 1.5
+mainStroke.Parent = mainFrame
+
+-- ================= THANH TIÊU ĐỀ (HEADER) =================
+local header = Instance.new("Frame")
+header.Name = "Header"
+header.Size = UDim2.new(1, 0, 0, 50)
+header.BackgroundTransparency = 1
+header.ZIndex = 51
+header.Parent = mainFrame
+
+local titleText = Instance.new("TextLabel")
+titleText.Size = UDim2.new(0, 400, 1, 0)
+titleText.Position = UDim2.new(0, 20, 0, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "Tzuy Hub - Interactive Edition"
+titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleText.Font = Enum.Font.GothamBold
+titleText.TextSize = 18
+titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.ZIndex = 52
+titleText.Parent = header
+
+local subTitle = Instance.new("TextLabel")
+subTitle.Size = UDim2.new(0, 300, 1, 0)
+subTitle.Position = UDim2.new(0, 320, 0, 0)
+subTitle.BackgroundTransparency = 1
+subTitle.Text = "| Premium UNC Script Hub"
+subTitle.TextColor3 = Color3.fromRGB(180, 190, 210)
+subTitle.Font = Enum.Font.Gotham
+subTitle.TextSize = 12
+subTitle.TextXAlignment = Enum.TextXAlignment.Left
+subTitle.ZIndex = 52
+subTitle.Parent = header
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 35, 0, 35)
+closeBtn.Position = UDim2.new(1, -45, 0.5, -17.5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.BackgroundTransparency = 0.8
+closeBtn.Text = "✕"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.TextSize = 16
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.ZIndex = 52
+closeBtn.Parent = header
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 8)
+
+-- ================= SIDEBAR (DANH MỤC TRÁI) =================
+local sidebar = Instance.new("ScrollingFrame")
+sidebar.Name = "Sidebar"
+sidebar.Size = UDim2.new(0, 220, 1, -65)
+sidebar.Position = UDim2.new(0, 10, 0, 55)
+sidebar.BackgroundTransparency = 1
+sidebar.BorderSizePixel = 0
+sidebar.ScrollBarThickness = 2
+sidebar.ZIndex = 51
+sidebar.Parent = mainFrame
+
+local sidebarLayout = Instance.new("UIListLayout")
+sidebarLayout.Padding = UDim.new(0, 6)
+sidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
+sidebarLayout.Parent = sidebar
+
+sidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    sidebar.CanvasSize = UDim2.new(0, 0, 0, sidebarLayout.AbsoluteContentSize.Y + 10)
+end)
+
+-- ================= CONTAINER NỘI DUNG (BÊN PHẢI) =================
+local contentContainer = Instance.new("Frame")
+contentContainer.Name = "ContentContainer"
+contentContainer.Size = UDim2.new(1, -245, 1, -65)
+contentContainer.Position = UDim2.new(0, 235, 0, 55)
+contentContainer.BackgroundTransparency = 1
+contentContainer.ZIndex = 51
+contentContainer.Parent = mainFrame
+
+local tabs = {}
+local tabButtons = {}
+local activeTab = nil
+
+local function createTabContent(name)
+    local scrollingFrame = Instance.new("ScrollingFrame")
+    scrollingFrame.Name = name .. "Content"
+    scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+    scrollingFrame.BackgroundTransparency = 1
+    scrollingFrame.BorderSizePixel = 0
+    scrollingFrame.ScrollBarThickness = 4
+    scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    scrollingFrame.Visible = false
+    scrollingFrame.ZIndex = 52
+    scrollingFrame.Parent = contentContainer
+    
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0, 8)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+    layout.Parent = scrollingFrame
+    
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scrollingFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
+    end)
+    
+    tabs[name] = scrollingFrame
+    return scrollingFrame
+end
+
+local function switchTab(name)
+    for tabName, frame in pairs(tabs) do
+        frame.Visible = (tabName == name)
+    end
+    for btnName, btn in pairs(tabButtons) do
+        if btnName == name then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+            btn.BackgroundTransparency = 0.2
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundTransparency = 0.93
+            btn.TextColor3 = Color3.fromRGB(200, 210, 230)
+        end
+    end
+    activeTab = name
+end
+
+local function addSidebarButton(name, iconText)
+    local btn = Instance.new("TextButton")
+    btn.Name = name .. "TabBtn"
+    btn.Size = UDim2.new(1, -5, 0, 42)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.93
+    btn.Text = "  " .. (iconText or "📁") .. "   " .. name
+    btn.TextColor3 = Color3.fromRGB(200, 210, 230)
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 14
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.ZIndex = 52
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        switchTab(name)
+    end)
+    
+    btn.Parent = sidebar
+    tabButtons[name] = btn
+    createTabContent(name)
+end
+
+-- Lưu trữ danh sách các nút tính năng để quản lý hiệu ứng Active khi chạm/bấm
+local scriptButtonsPerTab = {}
+
+local function addScriptButton(tabName, title, desc, callback)
+    local tabFrame = tabs[tabName]
+    if not tabFrame then return end
+    
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 52)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.90
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.ZIndex = 53
+    
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Transparency = 0.7
+    stroke.Thickness = 1
+    stroke.Parent = btn
+    
+    local tLbl = Instance.new("TextLabel")
+    tLbl.Size = UDim2.new(1, -20, 0, 22)
+    tLbl.Position = UDim2.new(0, 15, 0, 6)
+    tLbl.BackgroundTransparency = 1
+    tLbl.Text = title
+    tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    tLbl.Font = Enum.Font.GothamBold
+    tLbl.TextSize = 14
+    tLbl.TextXAlignment = Enum.TextXAlignment.Left
+    tLbl.ZIndex = 54
+    tLbl.Parent = btn
+    
+    local dLbl = Instance.new("TextLabel")
+    dLbl.Size = UDim2.new(1, -20, 0, 18)
+    dLbl.Position = UDim2.new(0, 15, 0, 26)
+    dLbl.BackgroundTransparency = 1
+    dLbl.Text = desc
+    dLbl.TextColor3 = Color3.fromRGB(180, 190, 210)
+    dLbl.Font = Enum.Font.Gotham
+    dLbl.TextSize = 11
+    dLbl.TextXAlignment = Enum.TextXAlignment.Left
+    dLbl.ZIndex = 54
+    dLbl.Parent = btn
+    
+    if not scriptButtonsPerTab[tabName] then
+        scriptButtonsPerTab[tabName] = {}
+    end
+    table.insert(scriptButtonsPerTab[tabName], {Button = btn, Stroke = stroke})
+    
+    -- Hiệu ứng khi chạm/bấm vào tính năng (Active Highlight State)
+    btn.MouseButton1Click:Connect(function()
+        -- Reset hiệu ứng của các nút khác trong cùng tab
+        for _, item in ipairs(scriptButtonsPerTab[tabName]) do
+            TweenService:Create(item.Button, TweenInfo.new(0.2), {
+                BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                BackgroundTransparency = 0.90
+            }):Play()
+            TweenService:Create(item.Stroke, TweenInfo.new(0.2), {
+                Transparency = 0.7
+            }):Play()
+        end
+        
+        -- Làm nổi bật nút được chạm vào (Active Blue Highlight)
+        TweenService:Create(btn, TweenInfo.new(0.2), {
+            BackgroundColor3 = Color3.fromRGB(0, 140, 255),
+            BackgroundTransparency = 0.15
+        }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.2), {
+            Transparency = 0.1
+        }):Play()
+        
+        -- Thực thi callback tính năng
+        callback()
+    end)
+    
+    btn.Parent = tabFrame
+end
+
+-- ================= TẠO CÁC NHÓM & TÍNH NĂNG =================
+
+-- 1. Nhóm Blox Fruits
+addSidebarButton("Blox Fruits", "⚔️")
+addScriptButton("Blox Fruits", "Redz Hub", "Script hỗ trợ Auto Farm, Sea Events, Quests mạnh mẽ.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/bloxfruitsnokey/Redz/refs/heads/main/Redz/update.luau"))()
+    end)
+end)
+addScriptButton("Blox Fruits", "RealKid (Blox Fruits)", "Script RealKid chuyên dụng tối ưu cho Blox Fruits.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/BloxFruits.lua"))()
+    end)
+end)
+
+-- 2. Nhóm Auto Hop (BF)
+addSidebarButton("Auto Hop (BF)", "🌐")
+addScriptButton("Auto Hop (BF)", "Teddy Hop", "Tự động đổi server tìm kiếm mục tiêu nhanh chóng.", function()
+    pcall(function()
+        loadstring("repeat task.wait() until game:IsLoaded() loadstring(game:HttpGet(\"https://raw.githubusercontent.com/Dex-Bear/VxezeHubLoader/refs/heads/main/MainHub.lua\"))()")()
+    end)
+end)
+addScriptButton("Auto Hop (BF)", "RealKid Hop", "Script Auto Hop tối ưu hóa từ RealKid.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/RealKidHop.lua"))()
+    end)
+end)
+
+-- 3. Nhóm Steal An Egg
+addSidebarButton("Steal An Egg", "🥚")
+addScriptButton("Steal An Egg", "RealKid", "Tự động hóa nhiệm vụ và thu thập trứng trong Steal An Egg.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))()
+    end)
+end)
+addScriptButton("Steal An Egg", "Teddy", "Script Teddy hỗ trợ farm trứng và tính năng vượt trội.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/StealAnEgg.lua"))()
+    end)
+end)
+addScriptButton("Steal An Egg", "Night Hub", "Night Hub hỗ trợ đầy đủ cho tựa game Steal An Egg.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))()
+    end)
+end)
+addScriptButton("Steal An Egg", "Chill x Venyx v7", "Giao diện Venyx v7 việt hóa Premium mới nhất cho Steal An Egg.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-x-venyx-viet-hoa-premium-v7-pro"))()
+    end)
+end)
+
+-- 4. Nhóm Settings & General (Có bộ đổi màu kính thủy tinh)
+addSidebarButton("Settings & General", "⚙️")
+
+addScriptButton("Settings & General", "Đổi màu Thủy tinh: Xanh Đậm (Default)", "Chuyển giao diện kính mờ sang tông Xanh Đậm sang trọng.", function()
+    mainFrame.BackgroundColor3 = Color3.fromRGB(20, 28, 45)
+end)
+addScriptButton("Settings & General", "Đổi màu Thủy tinh: Tím Huyền Bí", "Chuyển giao diện kính mờ sang tông Tím khói độc đáo.", function()
+    mainFrame.BackgroundColor3 = Color3.fromRGB(45, 20, 45)
+end)
+addScriptButton("Settings & General", "Đổi màu Thủy tinh: Đen Tối Giản (Onyx)", "Chuyển giao diện kính mờ sang tông Đen huyền bí.", function()
+    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+end)
+addScriptButton("Settings & General", "Đổi màu Thủy tinh: Xanh Ngọc (Emerald)", "Chuyển giao diện kính mờ sang tông Xanh ngọc lục bảo.", function()
+    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 40, 30)
+end)
+
+addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP, v.v.)", function()
+    pcall(function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end)
+end)
+addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel kiểm tra và chỉnh sửa cấu trúc game.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))()
+    end)
+end)
+
+-- Noclip Toggle
+local noclipActive = false
+RunService.Stepped:Connect(function()
+    if noclipActive and player.Character then
+        for _, part in ipairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
+    end
+end)
+addScriptButton("Settings & General", "Toggle Noclip", "Bật/Tắt chế độ đi xuyên tường.", function()
+    noclipActive = not noclipActive
+end)
+
+-- Chọn sẵn tab đầu tiên khi mở Hub
+switchTab("Blox Fruits")
+
+-- ================= LOGIC KÉO THẢ & RESPONSIVE =================
+local function updateScale()
+    local vp = workspace.CurrentCamera.ViewportSize
+    uiScale.Scale = math.min(vp.X / 950, vp.Y / 600)
+end
+updateScale()
+workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+
+-- Kéo thả Menu
+local menuDragging, menuDragStart, menuStartPos
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        menuDragging = true
+        menuDragStart = input.Position
+        menuStartPos = mainFrame.Position
+    end
+end)
+
+-- Kéo thả Nút bấm ngoài màn hình
+local btnDragging, btnDragStart, btnStartPos, wasDragged = false, nil, nil, false
+button.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        btnDragging = true
+        wasDragged = false
+        btnDragStart = input.Position
+        btnStartPos = button.Position
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        if menuDragging then
+            local delta = input.Position - menuDragStart
+            mainFrame.Position = UDim2.new(menuStartPos.X.Scale, menuStartPos.X.Offset + delta.X, menuStartPos.Y.Scale, menuStartPos.Y.Offset + delta.Y)
+        end
+        if btnDragging then
+            local delta = input.Position - btnDragStart
+            if math.abs(delta.X) > 3 or math.abs(delta.Y) > 3 then wasDragged = true end
+            button.Position = UDim2.new(btnStartPos.X.Scale, btnStartPos.X.Offset + delta.X, btnStartPos.Y.Scale, btnStartPos.Y.Offset + delta.Y)
+        end
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        menuDragging = false
+        btnDragging = false
+    end
+end)
+
+button.MouseButton1Click:Connect(function()
+    if wasDragged then wasDragged = false; return end
+    mainFrame.Visible = not mainFrame.Visible
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+end)
