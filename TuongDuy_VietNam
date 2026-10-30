@@ -1,6 +1,6 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism & 200+ Color Palette
--- Đã xóa nút X (Close) & Thu nhỏ nút Toggle (1.5x)
+-- Thấy Bố mày BÁ Khí Chưa Huy
 -- ================================================
 local Players       = game:GetService("Players")
 local UIS           = game:GetService("UserInputService")
