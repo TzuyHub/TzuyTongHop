@@ -1,6 +1,9 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism & 200+ Color Palette
--- Thấy-Bố Mày-BÁ-Khí-Chưa-TRÂN QUANG HUY 🗿🗿🗿
+-- Intro: "TƯ DUY BÁ KHÍ" → VỠ TAN 1600 HẠT → Menu bung ra
+-- Style: Teddy Hub Glassmorphism UI with Advanced Color Search
+-- Updated: Toggle Mở/Đóng + Viền cầu vồng cho cả NÚT & MENU
+-- Updated 2: Viền Menu dày 1.7
 -- ================================================
 local Players       = game:GetService("Players")
 local UIS           = game:GetService("UserInputService")
@@ -45,7 +48,26 @@ local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 12)
 btnCorner.Parent = button
 
--- ================= KHUNG MENU CHÍNH (THỦY TINH SANG TRỌNG) =================
+-- ================= KHAI BÁO TRƯỚC mainStroke =================
+local mainStroke
+
+-- ================= HIỆU ỨNG VIỀN CẦU VỒNG CHUYỂN ĐỘNG =================
+local isRainbowBorder = true
+local rainbowSpeed = 0.4
+local hue = 0
+
+RunService.RenderStepped:Connect(function(dt)
+    if isRainbowBorder then
+        hue = (hue + dt * rainbowSpeed) % 1
+        local rainbowColor = Color3.fromHSV(hue, 1, 1)
+        btnStroke.Color = rainbowColor
+        if mainStroke then
+            mainStroke.Color = rainbowColor
+        end
+    end
+end)
+
+-- ================= KHUNG MENU CHÍNH =================
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -65,10 +87,10 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 16)
 mainCorner.Parent = mainFrame
 
-local mainStroke = Instance.new("UIStroke")
+mainStroke = Instance.new("UIStroke")
 mainStroke.Color = Color3.fromRGB(255, 255, 255)
-mainStroke.Transparency = 0.6
-mainStroke.Thickness = 1.2
+mainStroke.Transparency = 0.4
+mainStroke.Thickness = 1.7      -- 🔥 Viền Menu dày 1.7
 mainStroke.Parent = mainFrame
 
 -- ================= HEADER & SEARCH BAR =================
@@ -91,7 +113,6 @@ titleText.TextXAlignment = Enum.TextXAlignment.Left
 titleText.ZIndex = 52
 titleText.Parent = header
 
--- Thanh Tìm Kiếm Tính Năng (Search Bar)
 local searchFrame = Instance.new("Frame")
 searchFrame.Name = "SearchFrame"
 searchFrame.Size = UDim2.new(0, 320, 0, 34)
@@ -341,113 +362,8 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.Parent = tabFrame
 end
 
--- ================= HÀM NÚT BẬT/TẮT VUÔNG (TOGGLE SQUARE - ĐÃ THU NHỎ 1.5x) =================
-local function addToggle(tabName, title, desc, defaultState, callback)
-    local tabFrame = tabs[tabName]
-    if not tabFrame then return end
-
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Name = title .. "Toggle"
-    toggleFrame.Size = UDim2.new(1, -10, 0, 52)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    toggleFrame.BackgroundTransparency = 0.90
-    toggleFrame.ZIndex = 53
-    toggleFrame.Parent = tabFrame
-
-    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 10)
-
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.75
-    stroke.Thickness = 1
-    stroke.Parent = toggleFrame
-
-    local tLbl = Instance.new("TextLabel")
-    tLbl.Size = UDim2.new(1, -100, 0, 22)
-    tLbl.Position = UDim2.new(0, 15, 0, 6)
-    tLbl.BackgroundTransparency = 1
-    tLbl.Text = title
-    tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tLbl.Font = Enum.Font.GothamBold
-    tLbl.TextSize = 14
-    tLbl.TextXAlignment = Enum.TextXAlignment.Left
-    tLbl.ZIndex = 54
-    tLbl.Parent = toggleFrame
-
-    local dLbl = Instance.new("TextLabel")
-    dLbl.Size = UDim2.new(1, -100, 0, 18)
-    dLbl.Position = UDim2.new(0, 15, 0, 26)
-    dLbl.BackgroundTransparency = 1
-    dLbl.Text = desc
-    dLbl.TextColor3 = Color3.fromRGB(180, 190, 210)
-    dLbl.Font = Enum.Font.Gotham
-    dLbl.TextSize = 11
-    dLbl.TextXAlignment = Enum.TextXAlignment.Left
-    dLbl.ZIndex = 54
-    dLbl.Parent = toggleFrame
-
-    -- 🔲 NÚT VUÔNG BẬT/TẮT (Kích thước thu nhỏ lại thành 28x28)
-    local toggleBtn = Instance.new("TextButton")
-    toggleBtn.Name = "ToggleBtn"
-    toggleBtn.Size = UDim2.new(0, 28, 0, 28) -- Giảm từ 42 xuống 28
-    toggleBtn.Position = UDim2.new(1, -43, 0.5, -14) -- Căn lại vị trí
-    toggleBtn.BackgroundColor3 = defaultState and Color3.fromRGB(0, 140, 255) or Color3.fromRGB(70, 75, 85)
-    toggleBtn.BackgroundTransparency = defaultState and 0.15 or 0.4
-    toggleBtn.Text = defaultState and "✓" or ""
-    toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    toggleBtn.TextSize = 15 -- Giảm từ 22 xuống 15
-    toggleBtn.Font = Enum.Font.GothamBold
-    toggleBtn.AutoButtonColor = false
-    toggleBtn.ZIndex = 54
-    toggleBtn.Parent = toggleFrame
-
-    Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 7) -- Bo góc nhỏ lại
-
-    local btnStroke = Instance.new("UIStroke")
-    btnStroke.Color = defaultState and Color3.fromRGB(0, 200, 255) or Color3.fromRGB(130, 135, 145)
-    btnStroke.Transparency = defaultState and 0.1 or 0.6
-    btnStroke.Thickness = 1.5 -- Viền mỏng lại
-    btnStroke.Parent = toggleBtn
-
-    local state = defaultState
-
-    table.insert(allScriptButtons, {
-        Button = toggleFrame,
-        Stroke = stroke,
-        Title = string.lower(title),
-        Desc = string.lower(desc),
-        TabName = tabName
-    })
-
-    toggleBtn.MouseButton1Click:Connect(function()
-        state = not state
-        if state then
-            TweenService:Create(toggleBtn, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-                BackgroundColor3 = Color3.fromRGB(0, 140, 255),
-                BackgroundTransparency = 0.15
-            }):Play()
-            TweenService:Create(btnStroke, TweenInfo.new(0.25), {
-                Color = Color3.fromRGB(0, 200, 255),
-                Transparency = 0.1
-            }):Play()
-            toggleBtn.Text = "✓"
-        else
-            TweenService:Create(toggleBtn, TweenInfo.new(0.25, Enum.EasingStyle.Quart), {
-                BackgroundColor3 = Color3.fromRGB(70, 75, 85),
-                BackgroundTransparency = 0.4
-            }):Play()
-            TweenService:Create(btnStroke, TweenInfo.new(0.25), {
-                Color = Color3.fromRGB(130, 135, 145),
-                Transparency = 0.6
-            }):Play()
-            toggleBtn.Text = ""
-        end
-        if callback then callback(state) end
-    end)
-end
-
--- ================= DANH SÁCH 200+ MÀU THỦY TINH ĐẦY ĐỦ =================
-local masterGlassColors = {
+-- ================= DANH SÁCH MÀU =================
+local masterColors = {
     {"Trong suốt – Clear", Color3.fromRGB(30, 35, 45), 0.6},
     {"Pha lê – Crystal", Color3.fromRGB(240, 245, 255), 0.5},
     {"Nước trong – Water Clear", Color3.fromRGB(200, 230, 255), 0.55},
@@ -583,16 +499,16 @@ local masterGlassColors = {
     {"Carnival Glass – Ánh Cầu Vồng", Color3.fromRGB(160, 100, 200), 0.35}
 }
 
--- ================= DROPDOWN MÀU THỦY TINH CÓ Ô TÌM KIẾM =================
-local function createGlassDropdown(tabName)
+-- ================= HÀM TẠO DROPDOWN =================
+local function createSearchDropdown(tabName, titleText, isBorder)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
 
     local dropdownFrame = Instance.new("Frame")
-    dropdownFrame.Name = "GlassColorDropdown"
+    dropdownFrame.Name = titleText:gsub("%s+", "") .. "Dropdown"
     dropdownFrame.Size = UDim2.new(1, -10, 0, 50)
-    dropdownFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 42) 
-    dropdownFrame.BackgroundTransparency = 0.2 
+    dropdownFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    dropdownFrame.BackgroundTransparency = 0.90
     dropdownFrame.ClipsDescendants = true
     dropdownFrame.ZIndex = 60
     dropdownFrame.Parent = tabFrame
@@ -614,7 +530,7 @@ local function createGlassDropdown(tabName)
     titleLbl.Size = UDim2.new(0, 220, 1, 0)
     titleLbl.Position = UDim2.new(0, 15, 0, 0)
     titleLbl.BackgroundTransparency = 1
-    titleLbl.Text = "Bộ Màu Thủy Tinh (200+ Colors)"
+    titleLbl.Text = titleText
     titleLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
     titleLbl.Font = Enum.Font.GothamBold
     titleLbl.TextSize = 14
@@ -626,7 +542,7 @@ local function createGlassDropdown(tabName)
     selectedLbl.Size = UDim2.new(0, 250, 1, 0)
     selectedLbl.Position = UDim2.new(1, -260, 0, 0)
     selectedLbl.BackgroundTransparency = 1
-    selectedLbl.Text = "Xanh Đậm (Default) ▾"
+    selectedLbl.Text = isBorder and "Cầu Vồng (Rainbow) ▾" or "Xanh Đậm (Default) ▾"
     selectedLbl.TextColor3 = Color3.fromRGB(0, 170, 255)
     selectedLbl.Font = Enum.Font.GothamMedium
     selectedLbl.TextSize = 13
@@ -640,7 +556,7 @@ local function createGlassDropdown(tabName)
     colorSearchBox.Position = UDim2.new(0, 15, 0, 55)
     colorSearchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     colorSearchBox.BackgroundTransparency = 0.88
-    colorSearchBox.PlaceholderText = "🔎 Nhập tên màu thủy tinh để tìm..."
+    colorSearchBox.PlaceholderText = "🔎 Nhập tên màu để tìm..."
     colorSearchBox.PlaceholderColor3 = Color3.fromRGB(160, 170, 190)
     colorSearchBox.Text = ""
     colorSearchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -680,7 +596,32 @@ local function createGlassDropdown(tabName)
 
     local createdColorButtons = {}
 
-    for index, colorData in ipairs(masterGlassColors) do
+    if isBorder then
+        local rainbowBtn = Instance.new("TextButton")
+        rainbowBtn.Size = UDim2.new(1, -5, 0, 32)
+        rainbowBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        rainbowBtn.BackgroundTransparency = 0.92
+        rainbowBtn.Text = "  🌈 Cầu Vồng (Rainbow)"
+        rainbowBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+        rainbowBtn.Font = Enum.Font.GothamBold
+        rainbowBtn.TextSize = 12
+        rainbowBtn.TextXAlignment = Enum.TextXAlignment.Left
+        rainbowBtn.ZIndex = 63
+        rainbowBtn.Parent = optionContainer
+        Instance.new("UICorner", rainbowBtn).CornerRadius = UDim.new(0, 6)
+
+        rainbowBtn.MouseButton1Click:Connect(function()
+            selectedLbl.Text = "Cầu Vồng (Rainbow) ▾"
+            isRainbowBorder = true
+            isOpen = false
+            TweenService:Create(dropdownFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                Size = UDim2.new(1, -10, 0, 50)
+            }):Play()
+        end)
+        table.insert(createdColorButtons, {Button = rainbowBtn, Name = "cầu vồng rainbow"})
+    end
+
+    for index, colorData in ipairs(masterColors) do
         local optBtn = Instance.new("TextButton")
         optBtn.Size = UDim2.new(1, -5, 0, 32)
         optBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -708,8 +649,18 @@ local function createGlassDropdown(tabName)
 
         optBtn.MouseButton1Click:Connect(function()
             selectedLbl.Text = colorData[1] .. " ▾"
-            mainFrame.BackgroundColor3 = colorData[2]
-            mainFrame.BackgroundTransparency = colorData[3] or 0.35
+            
+            if isBorder then
+                isRainbowBorder = false
+                btnStroke.Color = colorData[2]
+                if mainStroke then
+                    mainStroke.Color = colorData[2]
+                end
+            else
+                mainFrame.BackgroundColor3 = colorData[2]
+                mainFrame.BackgroundTransparency = colorData[3] or 0.35
+            end
+
             isOpen = false
             TweenService:Create(dropdownFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
                 Size = UDim2.new(1, -10, 0, 50)
@@ -770,6 +721,11 @@ addScriptButton("Auto Hop (BF)", "RealKid Hop", "Script Auto Hop tối ưu hóa 
         loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/RealKidHop.lua"))()
     end)
 end)
+addScriptButton("Auto Hop (BF)", "Night Hop (Key)", "Script Auto Hop hỗ trợ tìm kiếm máy chủ từ Night Hub.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/HopScript.luau"))()
+    end)
+end)
 
 addSidebarButton("Steal An Egg", "🥚")
 addScriptButton("Steal An Egg", "RealKid", "Tự động hóa nhiệm vụ và thu thập trứng.", function()
@@ -793,13 +749,21 @@ addScriptButton("Steal An Egg", "Chill x Venyx v7", "Giao diện Venyx v7 việt
     end)
 end)
 
--- ================= SETTINGS & GENERAL =================
 addSidebarButton("Settings & General", "⚙️")
-createGlassDropdown("Settings & General")
+createSearchDropdown("Settings & General", "Màu Nền Menu", false)
+createSearchDropdown("Settings & General", "Màu Viền Nút (Border)", true)
 
--- ====== KHU VỰC TOGGLE TÍNH NĂNG ======
+addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP).", function()
+    pcall(function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end)
+end)
+addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))()
+    end)
+end)
 
--- 1. NOCLIP
 local noclipActive = false
 RunService.Stepped:Connect(function()
     if noclipActive and player.Character then
@@ -808,87 +772,8 @@ RunService.Stepped:Connect(function()
         end
     end
 end)
-addToggle("Settings & General", "Noclip", "Đi xuyên tường và vật thể.", false, function(s)
-    noclipActive = s
-end)
-
--- 2. SPEED HACK
-addToggle("Settings & General", "Speed Hack", "Tăng tốc chạy (50).", false, function(s)
-    local char = player.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then hum.WalkSpeed = s and 50 or 16 end
-    end
-end)
-
--- 3. JUMP BOOST
-addToggle("Settings & General", "Jump Boost", "Tăng lực nhảy cao (120).", false, function(s)
-    local char = player.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            hum.UseJumpPower = true
-            hum.JumpPower = s and 120 or 50
-        end
-    end
-end)
-
--- 4. INFINITE JUMP
-local infJumpActive = false
-UIS.JumpRequest:Connect(function()
-    if infJumpActive and player.Character then
-        local hum = player.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end)
-addToggle("Settings & General", "Infinite Jump", "Nhảy vô hạn trên không.", false, function(s)
-    infJumpActive = s
-end)
-
--- 5. ANTI-AFK
-local antiAfkConn
-addToggle("Settings & General", "Anti-AFK", "Chống bị kick khi treo máy.", false, function(s)
-    if s then
-        antiAfkConn = player.Idled:Connect(function()
-            local vu = game:GetService("VirtualUser")
-            vu:CaptureController()
-            vu:ClickButton2(Vector2.new())
-        end)
-    else
-        if antiAfkConn then antiAfkConn:Disconnect() end
-        antiAfkConn = nil
-    end
-end)
-
--- 6. FULLBRIGHT
-local originalLighting = {}
-addToggle("Settings & General", "Fullbright", "Tắt sương mù, tăng độ sáng.", false, function(s)
-    local lighting = game:GetService("Lighting")
-    if s then
-        originalLighting.FogEnd = lighting.FogEnd
-        originalLighting.Brightness = lighting.Brightness
-        originalLighting.ClockTime = lighting.ClockTime
-        lighting.FogEnd = 100000
-        lighting.Brightness = 3
-        lighting.ClockTime = 14
-    else
-        lighting.FogEnd = originalLighting.FogEnd or 1000
-        lighting.Brightness = originalLighting.Brightness or 2
-        lighting.ClockTime = originalLighting.ClockTime or 14
-    end
-end)
-
--- ====== SCRIPT BUTTONS ======
-addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP).", function()
-    pcall(function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-    end)
-end)
-
-addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))()
-    end)
+addScriptButton("Settings & General", "Toggle Noclip", "Bật/Tắt chế độ đi xuyên tường.", function()
+    noclipActive = not noclipActive
 end)
 
 switchTab("Blox Fruits")
@@ -1064,7 +949,7 @@ local function showMenu()
         BackgroundTransparency = 0.35
     }):Play()
     TweenService:Create(mainStroke, TweenInfo.new(0.3), {
-        Transparency = 0.6
+        Transparency = 0.4
     }):Play()
 
     button.Visible = true
@@ -1095,13 +980,17 @@ local function hideMenu()
     end)
 end
 
--- ================= SỰ KIỆN =================
+-- ================= SỰ KIỆN TOGGLE (MỞ & ĐÓNG) =================
 local introActive = true
 
 button.MouseButton1Click:Connect(function()
     if wasDragged then wasDragged = false; return end
     introActive = false
-    if mainFrame.Visible then hideMenu() else showMenu() end
+    if mainFrame.Visible then
+        hideMenu()
+    else
+        showMenu()
+    end
 end)
 
 -- ================= INTRO =================
@@ -1117,4 +1006,4 @@ task.spawn(function()
     if not mainFrame.Visible then showMenu() end
 end)
 
-print("[Tzuy Hub] ✅ Đã load - Nút Toggle đã thu nhỏ 1.5 lần!")
+print("[Tzuy Hub] ✅ Đã load - Toggle Mở/Đóng + Viền cầu vồng + Viền Menu dày 1.7")
