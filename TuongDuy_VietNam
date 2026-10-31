@@ -1,9 +1,7 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism & 200+ Color Palette
 -- Intro: "TƯ DUY BÁ KHÍ" → VỠ TAN 1600 HẠT → Menu bung ra
--- Style: Teddy Hub Glassmorphism UI with Advanced Color Search
--- Updated: Toggle Mở/Đóng + Viền cầu vồng cho cả NÚT & MENU
--- Updated 2: Viền Menu dày 1.7
+-- Style: Tzuy Hub Glassmorphism UI with Advanced Color Search
 -- ================================================
 local Players       = game:GetService("Players")
 local UIS           = game:GetService("UserInputService")
