@@ -1,23 +1,62 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism & 200+ Color Palette
+-- Optimized & UNC Compliant Pipeline Version
 -- Intro: "TƯ DUY BÁ KHÍ" → VỠ TAN 1600 HẠT → Menu bung ra
 -- Style: Tzuy Hub Glassmorphism UI with Advanced Color Search
 -- + Interaction FX: Sound + Hover + Flash
--- + Toggle Switch cho Noclip
+-- + Toggle Switch cho Noclip + Dynamic Security Bypass
 -- ================================================
+
+-- [SECURITY & PERFORMANCE BYPASS LAYER]
+local getgenv = getgenv or function() return _G end
+local hookmetamethod = hookmetamethod or function(...) return ... end
+local sethiddenproperty = sethiddenproperty or function(...) return ... end
+
+-- Xóa GUI cũ ở mọi nơi (bao gồm cả trong gethui) để tránh lỗi nhân bản nút
+if getgenv().TzuyHubLoaded then
+    if getgenv().TzuyHubGui then
+        pcall(function() getgenv().TzuyHubGui:Destroy() end)
+    end
+    if game:GetService("CoreGui"):FindFirstChild("TzuyHubGui") then
+        game:GetService("CoreGui").TzuyHubGui:Destroy()
+    end
+    local pGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+    if pGui and pGui:FindFirstChild("TzuyHubGui") then
+        pGui.TzuyHubGui:Destroy()
+    end
+    if gethui then
+        local success, hiddenUI = pcall(gethui)
+        if success and hiddenUI and hiddenUI:FindFirstChild("TzuyHubGui") then
+            hiddenUI.TzuyHubGui:Destroy()
+        end
+    end
+end
+getgenv().TzuyHubLoaded = true
+
 local Players       = game:GetService("Players")
 local UIS           = game:GetService("UserInputService")
 local RunService    = game:GetService("RunService")
 local TweenService  = game:GetService("TweenService")
 local player        = Players.LocalPlayer
-local playerGui     = player:WaitForChild("PlayerGui")
+
+-- UI Container Selection (Prioritize CoreGui for Anti-Cheat Bypass)
+local playerGui
+if gethui then
+    local success, hiddenUI = pcall(gethui)
+    if success and hiddenUI then
+        playerGui = hiddenUI
+    end
+end
+if not playerGui then
+    if game:GetService("CoreGui"):FindFirstChild("RobloxGui") then
+        playerGui = game:GetService("CoreGui")
+    else
+        playerGui = player:WaitForChild("PlayerGui")
+    end
+end
 
 -- 🔥 ẢNH X Tzuy Hub X
 local IMAGE_ICON = "rbxthumb://type=Asset&id=83345601334673&w=150&h=150"
-
-if playerGui:FindFirstChild("TzuyHubGui") then
-    playerGui.TzuyHubGui:Destroy()
-end
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TzuyHubGui"
@@ -25,20 +64,23 @@ screenGui.ResetOnSpawn = false
 screenGui.IgnoreGuiInset = true
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
+getgenv().TzuyHubGui = screenGui
 
 -- ================= ÂM THANH =================
 local SFX_CLICK  = "rbxassetid://6895079853"
 local SFX_WHOOSH = "rbxassetid://876939830"
 
 local function playSfx(soundId, volume, pitch)
-    local s = Instance.new("Sound")
-    s.SoundId = soundId or SFX_CLICK
-    s.Volume = volume or 0.35
-    s.PlaybackSpeed = pitch or 1
-    s.Parent = screenGui
-    s:Play()
-    s.Ended:Connect(function() if s then s:Destroy() end end)
-    task.delay(3, function() if s and s.Parent then s:Destroy() end end)
+    task.spawn(function()
+        local s = Instance.new("Sound")
+        s.SoundId = soundId or SFX_CLICK
+        s.Volume = volume or 0.35
+        s.PlaybackSpeed = pitch or 1
+        s.Parent = screenGui
+        s:Play()
+        s.Ended:Connect(function() if s then s:Destroy() end end)
+        task.delay(3, function() if s and s.Parent then s:Destroy() end end)
+    end)
 end
 
 -- ================= NÚT BẤM NGOÀI =================
@@ -51,6 +93,7 @@ button.BackgroundTransparency = 1
 button.ImageTransparency = 0
 button.ScaleType = Enum.ScaleType.Fit
 button.ZIndex = 100
+button.Visible = false -- ẨN NÚT BAN ĐẦU
 button.Parent = screenGui
 
 local btnStroke = Instance.new("UIStroke")
@@ -878,7 +921,7 @@ local function createSearchDropdown(tabName, titleText, isBorder)
     colorSearchBox:GetPropertyChangedSignal("Text"):Connect(function()
         local filter = string.lower(colorSearchBox.Text)
         for _, item in ipairs(createdColorButtons) do
-            item.Button.Visible = (filter == "" or string.find(item.Name, filter)) and true or false
+            item.Button.Visible = (filter == "" or string.find(item.Name, filter, 1, true)) and true or false
         end
     end)
 end
@@ -887,7 +930,7 @@ end
 searchBox:GetPropertyChangedSignal("Text"):Connect(function()
     local query = string.lower(searchBox.Text)
     for _, item in ipairs(allScriptButtons) do
-        item.Button.Visible = (query == "" or string.find(item.Title, query) or string.find(item.Desc, query)) and true or false
+        item.Button.Visible = (query == "" or string.find(item.Title, query, 1, true) or string.find(item.Desc, query, 1, true)) and true or false
     end
 end)
 
@@ -961,16 +1004,32 @@ end)
 
 -- ================= NOCLIP - DẠNG CÔNG TẮC =================
 local noclipActive = false
-RunService.Stepped:Connect(function()
-    if noclipActive and player.Character then
-        for _, part in ipairs(player.Character:GetDescendants()) do
-            if part:IsA("BasePart") then part.CanCollide = false end
+local noclipConnection = nil
+
+local function toggleNoclipState(state)
+    noclipActive = state
+    if noclipActive then
+        if not noclipConnection then
+            noclipConnection = RunService.Stepped:Connect(function()
+                if noclipActive and player.Character then
+                    for _, part in ipairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+        end
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
         end
     end
-end)
+end
 
 addToggleButton("Settings & General", "Toggle Noclip", "Bật/Tắt đi xuyên tường", false, function(state)
-    noclipActive = state
+    toggleNoclipState(state)
 end)
 
 switchTab("Blox Fruits")
@@ -980,12 +1039,17 @@ local isAnimating = false
 local baseScale = 1
 
 local function updateScale()
-    local vp = workspace.CurrentCamera.ViewportSize
-    baseScale = math.min(vp.X / 950, vp.Y / 600)
-    if not isAnimating then uiScale.Scale = baseScale end
+    local cam = workspace.CurrentCamera
+    if cam then
+        local vp = cam.ViewportSize
+        baseScale = math.min(vp.X / 950, vp.Y / 600)
+        if not isAnimating then uiScale.Scale = baseScale end
+    end
 end
 updateScale()
-workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+if workspace.CurrentCamera then
+    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+end
 
 -- ================= DRAG =================
 local menuDragging, menuDragStart, menuStartPos
@@ -1009,7 +1073,7 @@ end)
 
 UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        if menuDragging then
+        if menuDragging and workspace.CurrentCamera then
             local delta = input.Position - menuDragStart
             local newX = menuStartPos.X.Offset + delta.X
             local newY = menuStartPos.Y.Offset + delta.Y
@@ -1048,6 +1112,13 @@ local function shatterText()
     baKhiSplash.TextTransparency = 1
     playSfx("rbxassetid://876939830", 0.55, 1.2)
 
+    -- HIỆN NÚT BẤM SAU KHI CHỮ VỠ TAN 0.1s
+    task.delay(0.1, function()
+        if button then
+            button.Visible = true
+        end
+    end)
+
     local flash = Instance.new("Frame")
     flash.Size = UDim2.new(1, 0, 1, 0)
     flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1069,7 +1140,7 @@ local function shatterText()
     local BATCHES = 4
     local perBatch = PARTICLE_COUNT / BATCHES
 
-    local vp = workspace.CurrentCamera.ViewportSize
+    local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
     local MAX_DISTANCE = math.sqrt(vp.X * vp.X + vp.Y * vp.Y) * 0.5
 
     for b = 1, BATCHES do
@@ -1182,4 +1253,4 @@ task.spawn(function()
     if not mainFrame.Visible then showMenu() end
 end)
 
-print("[Tzuy Hub] ✅ Đã load - Không còn thông báo toast")
+print("[Tzuy Hub] ✅ Đã load - UNC Luau Execution Pipeline Ready")
