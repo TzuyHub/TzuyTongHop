@@ -994,7 +994,7 @@ addScriptButton("Steal An Egg", "Chill x Venyx v7", "", function()
 end)
 addScriptButton("Steal An Egg", "Chilli v8", "", function()
     pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/napun87/stealanegg/refs/heads/main/chilli.otcaydodaiNoKey3.7.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyTongHop/refs/heads/main/protected_script_1793439721869.luau.txt"))()
     end)
 end)
 
