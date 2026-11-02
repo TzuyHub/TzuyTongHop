@@ -6,6 +6,7 @@
 -- + Interaction FX: Sound + Hover + Flash
 -- + Toggle Switch cho Noclip + Dynamic Security Bypass
 -- + Menu Background: ID 123700845345045 (Sáng & Rõ Nét)
+-- + Toggle Button: 42x42
 -- ================================================
 
 -- [SECURITY & PERFORMANCE BYPASS LAYER]
@@ -83,10 +84,10 @@ local function playSfx(soundId, volume, pitch)
     end)
 end
 
--- ================= NÚT BẤM NGOÀI =================
+-- ================= NÚT BẤM NGOÀI (42x42) =================
 local button = Instance.new("ImageButton")
 button.Name = "ToggleButton"
-button.Size = UDim2.new(0, 60, 0, 60)
+button.Size = UDim2.new(0, 42, 0, 42)
 button.Position = UDim2.new(0, 15, 0.3, 0)
 button.Image = IMAGE_ICON
 button.BackgroundTransparency = 1
@@ -98,11 +99,11 @@ button.Parent = screenGui
 
 local btnStroke = Instance.new("UIStroke")
 btnStroke.Color = Color3.fromRGB(0, 170, 255)
-btnStroke.Thickness = 2
+btnStroke.Thickness = 1.8
 btnStroke.Parent = button
 
 local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0, 12)
+btnCorner.CornerRadius = UDim.new(0, 10)
 btnCorner.Parent = button
 
 local mainStroke
@@ -932,4 +933,4 @@ task.spawn(function()
     if not mainFrame.Visible then showMenu() end
 end)
 
-print("[Tzuy Hub] ✅ Đã load - Menu Background ID 123700845345045 | Border Rainbow Auto")
+print("[Tzuy Hub] ✅ Đã load - Menu Bg: 123700845345045 | Button: 42x42 | Border Rainbow Auto")
