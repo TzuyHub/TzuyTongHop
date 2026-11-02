@@ -5,6 +5,7 @@
 -- Style: Tzuy Hub Glassmorphism UI with Advanced Color Search
 -- + Interaction FX: Sound + Hover + Flash
 -- + Toggle Switch cho Noclip + Dynamic Security Bypass
+-- + Menu Background: ID 137404793209934 (Sáng & Rõ Nét)
 -- ================================================
 
 -- [SECURITY & PERFORMANCE BYPASS LAYER]
@@ -12,7 +13,7 @@ local getgenv = getgenv or function() return _G end
 local hookmetamethod = hookmetamethod or function(...) return ... end
 local sethiddenproperty = sethiddenproperty or function(...) return ... end
 
--- Xóa GUI cũ ở mọi nơi (bao gồm cả trong gethui) để tránh lỗi nhân bản nút
+-- Xóa GUI cũ ở mọi nơi
 if getgenv().TzuyHubLoaded then
     if getgenv().TzuyHubGui then
         pcall(function() getgenv().TzuyHubGui:Destroy() end)
@@ -39,7 +40,7 @@ local RunService    = game:GetService("RunService")
 local TweenService  = game:GetService("TweenService")
 local player        = Players.LocalPlayer
 
--- UI Container Selection (Prioritize CoreGui for Anti-Cheat Bypass)
+-- UI Container Selection
 local playerGui
 if gethui then
     local success, hiddenUI = pcall(gethui)
@@ -55,7 +56,6 @@ if not playerGui then
     end
 end
 
--- 🔥 ẢNH X Tzuy Hub X
 local IMAGE_ICON = "rbxthumb://type=Asset&id=83345601334673&w=150&h=150"
 
 local screenGui = Instance.new("ScreenGui")
@@ -93,7 +93,7 @@ button.BackgroundTransparency = 1
 button.ImageTransparency = 0
 button.ScaleType = Enum.ScaleType.Fit
 button.ZIndex = 100
-button.Visible = false -- ẨN NÚT BAN ĐẦU
+button.Visible = false 
 button.Parent = screenGui
 
 local btnStroke = Instance.new("UIStroke")
@@ -125,12 +125,28 @@ mainFrame.Name = "MainFrame"
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.Size = UDim2.new(0, 880, 0, 540)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 42)
-mainFrame.BackgroundTransparency = 0.35
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 42) 
+mainFrame.BackgroundTransparency = 0.75 -- Lớp nền tối mờ đi để ảnh nổi bật
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.ZIndex = 50
+mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
+
+-- 🔥 HÌNH NỀN MENU SẮC NÉT (ID 137404793209934) 🔥
+local menuBgImage = Instance.new("ImageLabel")
+menuBgImage.Name = "MenuBgImage"
+menuBgImage.Size = UDim2.new(1, 0, 1, 0)
+menuBgImage.BackgroundTransparency = 1
+menuBgImage.Image = "rbxthumb://type=Asset&id=137404793209934&w=420&h=420"
+menuBgImage.ScaleType = Enum.ScaleType.Crop
+menuBgImage.ImageTransparency = 0 -- 0 = Hiển thị 100% độ sáng và sắc nét
+menuBgImage.ZIndex = 50
+menuBgImage.Parent = mainFrame
+
+local bgCorner = Instance.new("UICorner")
+bgCorner.CornerRadius = UDim.new(0, 16)
+bgCorner.Parent = menuBgImage
 
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = mainFrame
@@ -476,7 +492,7 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.Parent = tabFrame
 end
 
--- ================= NÚT TOGGLE (công tắc gạt) =================
+-- ================= NÚT TOGGLE =================
 local function addToggleButton(tabName, title, desc, initialState, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -906,9 +922,6 @@ local function createSearchDropdown(tabName, titleText, isBorder)
                 isRainbowBorder = false
                 btnStroke.Color = colorData[2]
                 if mainStroke then mainStroke.Color = colorData[2] end
-            else
-                mainFrame.BackgroundColor3 = colorData[2]
-                mainFrame.BackgroundTransparency = colorData[3] or 0.35
             end
 
             isOpen = false
@@ -946,7 +959,6 @@ addScriptButton("Blox Fruits", "RealKid", "", function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/BloxFruits.lua"))()
     end)
 end)
--- TÍNH NĂNG MỚI ĐƯỢC THÊM VÀO BLOX FRUITS
 addScriptButton("Blox Fruits", "Teddy Hub", "", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/TeddyHub.lua"))()
@@ -993,8 +1005,8 @@ addScriptButton("Steal An Egg", "Chilli v8", "", function()
     end)
 end)
 
+-- ================= SETTINGS & GENERAL =================
 addSidebarButton("Settings & General", "⚙️")
-createSearchDropdown("Settings & General", "Màu Nền Menu", false)
 createSearchDropdown("Settings & General", "Màu Viền Nút (Border)", true)
 
 addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP).", function()
@@ -1118,7 +1130,6 @@ local function shatterText()
     baKhiSplash.TextTransparency = 1
     playSfx("rbxassetid://876939830", 0.55, 1.2)
 
-    -- HIỆN NÚT BẤM SAU KHI CHỮ VỠ TAN 0.1s
     task.delay(0.1, function()
         if button then
             button.Visible = true
@@ -1210,7 +1221,7 @@ local function showMenu()
     mainStroke.Transparency = 1
 
     TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = baseScale }):Play()
-    TweenService:Create(mainFrame, TweenInfo.new(0.3), { BackgroundTransparency = 0.35 }):Play()
+    TweenService:Create(mainFrame, TweenInfo.new(0.3), { BackgroundTransparency = 0.75 }):Play() -- Đã đồng bộ thành 0.75
     TweenService:Create(mainStroke, TweenInfo.new(0.3), { Transparency = 0.4 }):Play()
 
     button.Visible = true
@@ -1259,4 +1270,4 @@ task.spawn(function()
     if not mainFrame.Visible then showMenu() end
 end)
 
-print("[Tzuy Hub] ✅ Đã load - UNC Luau Execution Pipeline Ready")
+print("[Tzuy Hub] ✅ Đã load - Bright Menu Background Applied")
