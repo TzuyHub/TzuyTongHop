@@ -1,12 +1,10 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism
--- Optimized & UNC Compliant Pipeline Version
 -- No Intro | No Explosion | Direct Open
--- Style: Tzuy Hub Glassmorphism UI
--- + Interaction FX: Sound + Hover + Flash
--- + Toggle Switch cho Noclip + Dynamic Security Bypass
--- + Menu Background: ID 123700845345045
--- + Toggle Button: 45x45 | Icon ID 116294082135305
+-- + Tên tính năng: XANH DƯƠNG SÁNG + viền trắng
+-- + Bỏ desc, tên to 17, khung click 52px
+-- + Added: Vzeze Hub | Bacon Hub | Redz Hub v2
+-- + Menu Bg: 123700845345045 | Button: 45x45
 -- ================================================
 
 -- [SECURITY & PERFORMANCE BYPASS LAYER]
@@ -14,23 +12,16 @@ local getgenv = getgenv or function() return _G end
 local hookmetamethod = hookmetamethod or function(...) return ... end
 local sethiddenproperty = sethiddenproperty or function(...) return ... end
 
--- Xóa GUI cũ ở mọi nơi
 if getgenv().TzuyHubLoaded then
-    if getgenv().TzuyHubGui then
-        pcall(function() getgenv().TzuyHubGui:Destroy() end)
-    end
+    if getgenv().TzuyHubGui then pcall(function() getgenv().TzuyHubGui:Destroy() end) end
     if game:GetService("CoreGui"):FindFirstChild("TzuyHubGui") then
         game:GetService("CoreGui").TzuyHubGui:Destroy()
     end
     local pGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
-    if pGui and pGui:FindFirstChild("TzuyHubGui") then
-        pGui.TzuyHubGui:Destroy()
-    end
+    if pGui and pGui:FindFirstChild("TzuyHubGui") then pGui.TzuyHubGui:Destroy() end
     if gethui then
-        local success, hiddenUI = pcall(gethui)
-        if success and hiddenUI and hiddenUI:FindFirstChild("TzuyHubGui") then
-            hiddenUI.TzuyHubGui:Destroy()
-        end
+        local s, h = pcall(gethui)
+        if s and h and h:FindFirstChild("TzuyHubGui") then h.TzuyHubGui:Destroy() end
     end
 end
 getgenv().TzuyHubLoaded = true
@@ -41,13 +32,17 @@ local RunService    = game:GetService("RunService")
 local TweenService  = game:GetService("TweenService")
 local player        = Players.LocalPlayer
 
+-- ================= MÀU CHỮ =================
+local TEXT_BLACK       = Color3.fromRGB(15, 15, 20)
+local TEXT_PURE_BLACK  = Color3.fromRGB(0, 0, 0)
+local TEXT_BLUE_BRIGHT = Color3.fromRGB(0, 170, 255)   -- 🔵 Xanh dương sáng
+local TEXT_WHITE       = Color3.fromRGB(255, 255, 255)
+
 -- UI Container Selection
 local playerGui
 if gethui then
-    local success, hiddenUI = pcall(gethui)
-    if success and hiddenUI then
-        playerGui = hiddenUI
-    end
+    local s, h = pcall(gethui)
+    if s and h then playerGui = h end
 end
 if not playerGui then
     if game:GetService("CoreGui"):FindFirstChild("RobloxGui") then
@@ -134,7 +129,7 @@ mainFrame.ZIndex = 50
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 
--- 🔥 HÌNH NỀN MENU SẮC NÉT (ID 123700845345045) 🔥
+-- 🔥 HÌNH NỀN MENU (ID 123700845345045) 🔥
 local menuBgImage = Instance.new("ImageLabel")
 menuBgImage.Name = "MenuBgImage"
 menuBgImage.Size = UDim2.new(1, 0, 1, 0)
@@ -175,10 +170,12 @@ titleText.Size = UDim2.new(0, 220, 1, 0)
 titleText.Position = UDim2.new(0, 20, 0, 0)
 titleText.BackgroundTransparency = 1
 titleText.Text = "Tzuy Hub"
-titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleText.Font = Enum.Font.GothamBold
-titleText.TextSize = 20
+titleText.TextColor3 = TEXT_BLACK
+titleText.Font = Enum.Font.GothamBlack
+titleText.TextSize = 22
 titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.TextStrokeTransparency = 0.45
+titleText.TextStrokeColor3 = TEXT_WHITE
 titleText.ZIndex = 52
 titleText.Parent = header
 
@@ -195,8 +192,8 @@ searchFrame.Parent = header
 Instance.new("UICorner", searchFrame).CornerRadius = UDim.new(0, 8)
 
 local searchStroke = Instance.new("UIStroke")
-searchStroke.Color = Color3.fromRGB(255, 255, 255)
-searchStroke.Transparency = 0.8
+searchStroke.Color = Color3.fromRGB(0, 0, 0)
+searchStroke.Transparency = 0.55
 searchStroke.Thickness = 1
 searchStroke.Parent = searchFrame
 
@@ -205,6 +202,7 @@ searchIcon.Size = UDim2.new(0, 30, 1, 0)
 searchIcon.BackgroundTransparency = 1
 searchIcon.Text = "🔍"
 searchIcon.TextSize = 13
+searchIcon.TextColor3 = TEXT_BLACK
 searchIcon.ZIndex = 53
 searchIcon.Parent = searchFrame
 
@@ -214,10 +212,10 @@ searchBox.Size = UDim2.new(1, -35, 1, 0)
 searchBox.Position = UDim2.new(0, 30, 0, 0)
 searchBox.BackgroundTransparency = 1
 searchBox.PlaceholderText = "Tìm kiếm tính năng..."
-searchBox.PlaceholderColor3 = Color3.fromRGB(160, 170, 190)
+searchBox.PlaceholderColor3 = Color3.fromRGB(70, 75, 90)
 searchBox.Text = ""
-searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-searchBox.Font = Enum.Font.Gotham
+searchBox.TextColor3 = TEXT_BLACK
+searchBox.Font = Enum.Font.GothamBold
 searchBox.TextSize = 13
 searchBox.TextXAlignment = Enum.TextXAlignment.Left
 searchBox.ZIndex = 53
@@ -264,7 +262,7 @@ local function createTabContent(name)
     sf.BackgroundTransparency = 1
     sf.BorderSizePixel = 0
     sf.ScrollBarThickness = 4
-    sf.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+    sf.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
     sf.Visible = false
     sf.ZIndex = 52
     sf.Parent = contentContainer
@@ -289,12 +287,12 @@ local function switchTab(name)
     for btnName, btn in pairs(tabButtons) do
         if btnName == name then
             btn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
-            btn.BackgroundTransparency = 0.25
-            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundTransparency = 0.15
+            btn.TextColor3 = TEXT_PURE_BLACK
         else
             btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundTransparency = 0.93
-            btn.TextColor3 = Color3.fromRGB(200, 210, 230)
+            btn.BackgroundTransparency = 0.85
+            btn.TextColor3 = TEXT_BLACK
         end
     end
     activeTab = name
@@ -305,10 +303,10 @@ local function addSidebarButton(name, iconText)
     btn.Name = name .. "TabBtn"
     btn.Size = UDim2.new(1, -5, 0, 42)
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BackgroundTransparency = 0.93
+    btn.BackgroundTransparency = 0.85
     btn.Text = "  " .. (iconText or "📁") .. "   " .. name
-    btn.TextColor3 = Color3.fromRGB(200, 210, 230)
-    btn.Font = Enum.Font.GothamMedium
+    btn.TextColor3 = TEXT_BLACK
+    btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
     btn.TextXAlignment = Enum.TextXAlignment.Left
     btn.ZIndex = 52
@@ -318,10 +316,16 @@ local function addSidebarButton(name, iconText)
     corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = btn
 
+    local btnStroke2 = Instance.new("UIStroke")
+    btnStroke2.Color = Color3.fromRGB(0, 0, 0)
+    btnStroke2.Transparency = 0.75
+    btnStroke2.Thickness = 1
+    btnStroke2.Parent = btn
+
     btn.MouseEnter:Connect(function()
         if activeTab ~= name then
             TweenService:Create(btn, TweenInfo.new(0.15), {
-                BackgroundTransparency = 0.85
+                BackgroundTransparency = 0.7
             }):Play()
         end
     end)
@@ -329,7 +333,7 @@ local function addSidebarButton(name, iconText)
     btn.MouseLeave:Connect(function()
         if activeTab ~= name then
             TweenService:Create(btn, TweenInfo.new(0.15), {
-                BackgroundTransparency = 0.93
+                BackgroundTransparency = 0.85
             }):Play()
         end
     end)
@@ -345,7 +349,7 @@ local function addSidebarButton(name, iconText)
     createTabContent(name)
 end
 
--- ================= NÚT SCRIPT THƯỜNG =================
+-- ================= NÚT SCRIPT THƯỜNG (52px, không desc, xanh dương sáng) =================
 local function addScriptButton(tabName, title, desc, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -354,7 +358,7 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.Name = title .. "Button"
     btn.Size = UDim2.new(1, -10, 0, 52)
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BackgroundTransparency = 0.90
+    btn.BackgroundTransparency = 0.82
     btn.Text = ""
     btn.AutoButtonColor = false
     btn.ZIndex = 53
@@ -362,40 +366,31 @@ local function addScriptButton(tabName, title, desc, callback)
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.75
+    stroke.Color = Color3.fromRGB(0, 0, 0)
+    stroke.Transparency = 0.7
     stroke.Thickness = 1
     stroke.Parent = btn
 
     local tLbl = Instance.new("TextLabel")
-    tLbl.Size = UDim2.new(1, -20, 0, 22)
-    tLbl.Position = UDim2.new(0, 15, 0, 6)
+    tLbl.Size = UDim2.new(1, -30, 1, 0)
+    tLbl.Position = UDim2.new(0, 15, 0, 0)
     tLbl.BackgroundTransparency = 1
     tLbl.Text = title
-    tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tLbl.Font = Enum.Font.GothamBold
-    tLbl.TextSize = 14
+    tLbl.TextColor3 = TEXT_BLUE_BRIGHT           -- 🔵 XANH DƯƠNG SÁNG
+    tLbl.Font = Enum.Font.GothamBlack
+    tLbl.TextSize = 17
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
+    tLbl.TextYAlignment = Enum.TextYAlignment.Center
+    tLbl.TextStrokeTransparency = 0.3             -- Viền trắng đậm
+    tLbl.TextStrokeColor3 = TEXT_WHITE
     tLbl.ZIndex = 54
     tLbl.Parent = btn
-
-    local dLbl = Instance.new("TextLabel")
-    dLbl.Size = UDim2.new(1, -20, 0, 18)
-    dLbl.Position = UDim2.new(0, 15, 0, 26)
-    dLbl.BackgroundTransparency = 1
-    dLbl.Text = desc
-    dLbl.TextColor3 = Color3.fromRGB(180, 190, 210)
-    dLbl.Font = Enum.Font.Gotham
-    dLbl.TextSize = 11
-    dLbl.TextXAlignment = Enum.TextXAlignment.Left
-    dLbl.ZIndex = 54
-    dLbl.Parent = btn
 
     local itemData = {
         Button = btn,
         Stroke = stroke,
         Title = string.lower(title),
-        Desc = string.lower(desc),
+        Desc = string.lower(desc or ""),
         TabName = tabName
     }
     table.insert(allScriptButtons, itemData)
@@ -403,10 +398,10 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.MouseEnter:Connect(function()
         if not btn:GetAttribute("Active") then
             TweenService:Create(btn, TweenInfo.new(0.18), {
-                BackgroundTransparency = 0.82
+                BackgroundTransparency = 0.7
             }):Play()
             TweenService:Create(stroke, TweenInfo.new(0.18), {
-                Transparency = 0.5
+                Transparency = 0.4
             }):Play()
         end
     end)
@@ -414,10 +409,10 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.MouseLeave:Connect(function()
         if not btn:GetAttribute("Active") then
             TweenService:Create(btn, TweenInfo.new(0.18), {
-                BackgroundTransparency = 0.90
+                BackgroundTransparency = 0.82
             }):Play()
             TweenService:Create(stroke, TweenInfo.new(0.18), {
-                Transparency = 0.75
+                Transparency = 0.7
             }):Play()
         end
     end)
@@ -430,10 +425,10 @@ local function addScriptButton(tabName, title, desc, callback)
                 item.Button:SetAttribute("Active", false)
                 TweenService:Create(item.Button, TweenInfo.new(0.2), {
                     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-                    BackgroundTransparency = 0.90
+                    BackgroundTransparency = 0.82
                 }):Play()
                 TweenService:Create(item.Stroke, TweenInfo.new(0.2), {
-                    Transparency = 0.75
+                    Transparency = 0.7
                 }):Play()
             end
         end
@@ -441,10 +436,10 @@ local function addScriptButton(tabName, title, desc, callback)
         btn:SetAttribute("Active", true)
         TweenService:Create(btn, TweenInfo.new(0.2), {
             BackgroundColor3 = Color3.fromRGB(0, 140, 255),
-            BackgroundTransparency = 0.20
+            BackgroundTransparency = 0.15
         }):Play()
         TweenService:Create(stroke, TweenInfo.new(0.2), {
-            Transparency = 0.1
+            Transparency = 0.05
         }):Play()
 
         task.spawn(function()
@@ -468,7 +463,7 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.Parent = tabFrame
 end
 
--- ================= NÚT TOGGLE =================
+-- ================= NÚT TOGGLE (52px, không desc, xanh dương sáng) =================
 local function addToggleButton(tabName, title, desc, initialState, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -479,7 +474,7 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
     btn.Name = title .. "Toggle"
     btn.Size = UDim2.new(1, -10, 0, 52)
     btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    btn.BackgroundTransparency = 0.90
+    btn.BackgroundTransparency = 0.82
     btn.Text = ""
     btn.AutoButtonColor = false
     btn.ZIndex = 53
@@ -487,34 +482,25 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
     local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Transparency = 0.75
+    stroke.Color = Color3.fromRGB(0, 0, 0)
+    stroke.Transparency = 0.7
     stroke.Thickness = 1
     stroke.Parent = btn
 
     local tLbl = Instance.new("TextLabel")
-    tLbl.Size = UDim2.new(1, -90, 0, 22)
-    tLbl.Position = UDim2.new(0, 15, 0, 6)
+    tLbl.Size = UDim2.new(1, -90, 1, 0)
+    tLbl.Position = UDim2.new(0, 15, 0, 0)
     tLbl.BackgroundTransparency = 1
     tLbl.Text = title
-    tLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tLbl.Font = Enum.Font.GothamBold
-    tLbl.TextSize = 14
+    tLbl.TextColor3 = TEXT_BLUE_BRIGHT           -- 🔵 XANH DƯƠNG SÁNG
+    tLbl.Font = Enum.Font.GothamBlack
+    tLbl.TextSize = 17
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
+    tLbl.TextYAlignment = Enum.TextYAlignment.Center
+    tLbl.TextStrokeTransparency = 0.3
+    tLbl.TextStrokeColor3 = TEXT_WHITE
     tLbl.ZIndex = 54
     tLbl.Parent = btn
-
-    local dLbl = Instance.new("TextLabel")
-    dLbl.Size = UDim2.new(1, -90, 0, 18)
-    dLbl.Position = UDim2.new(0, 15, 0, 26)
-    dLbl.BackgroundTransparency = 1
-    dLbl.Text = desc
-    dLbl.TextColor3 = Color3.fromRGB(180, 190, 210)
-    dLbl.Font = Enum.Font.Gotham
-    dLbl.TextSize = 11
-    dLbl.TextXAlignment = Enum.TextXAlignment.Left
-    dLbl.ZIndex = 54
-    dLbl.Parent = btn
 
     local track = Instance.new("Frame")
     track.Size = UDim2.new(0, 46, 0, 24)
@@ -538,26 +524,26 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
         Button = btn,
         Stroke = stroke,
         Title = string.lower(title),
-        Desc = string.lower(desc),
+        Desc = string.lower(desc or ""),
         TabName = tabName,
         IsToggle = true
     })
 
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.18), {
-            BackgroundTransparency = 0.82
+            BackgroundTransparency = 0.7
         }):Play()
         TweenService:Create(stroke, TweenInfo.new(0.18), {
-            Transparency = 0.5
+            Transparency = 0.4
         }):Play()
     end)
 
     btn.MouseLeave:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.18), {
-            BackgroundTransparency = 0.90
+            BackgroundTransparency = 0.82
         }):Play()
         TweenService:Create(stroke, TweenInfo.new(0.18), {
-            Transparency = 0.75
+            Transparency = 0.7
         }):Play()
     end)
 
@@ -588,19 +574,34 @@ end)
 
 -- ================= NHÓM CHỨC NĂNG =================
 addSidebarButton("Blox Fruits", "⚔️")
-addScriptButton("Blox Fruits", "Redz Hub", "", function()
+
+addScriptButton("Blox Fruits", "Redz Hub", "Hub đa chức năng Blox Fruits (v2).", function()
     pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/bloxfruitsnokey/Redz/refs/heads/main/Redz/v1.luau"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/trulyouo/RedZ-Hub/refs/heads/main/redz-v2"))()
     end)
 end)
+
 addScriptButton("Blox Fruits", "RealKid", "", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/BloxFruits.lua"))()
     end)
 end)
+
 addScriptButton("Blox Fruits", "Teddy Hub", "", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/TeddyHub.lua"))()
+    end)
+end)
+
+addScriptButton("Blox Fruits", "Vzeze Hub", "Hub đa chức năng cho Blox Fruits.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/VxezeHubLoader/refs/heads/main/MainHub.lua"))()
+    end)
+end)
+
+addScriptButton("Blox Fruits", "Bacon Hub", "Hub đa chức năng cho Blox Fruits.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BaconHub/hack/refs/heads/main/BaconHub.lua"))()
     end)
 end)
 
@@ -748,7 +749,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- ================= MỞ / ĐÓNG MENU (KHÔNG INTRO) =================
+-- ================= MỞ / ĐÓNG MENU =================
 local function showMenu()
     mainFrame.Visible = true
     isAnimating = true
@@ -779,7 +780,6 @@ local function hideMenu()
     end)
 end
 
--- ================= TOGGLE =================
 button.MouseButton1Click:Connect(function()
     if wasDragged then wasDragged = false; return end
     playSfx(SFX_WHOOSH, 0.4)
@@ -790,10 +790,9 @@ button.MouseButton1Click:Connect(function()
     end
 end)
 
--- ================= AUTO MỞ MENU NGAY KHI LOAD =================
 task.spawn(function()
     task.wait(0.1)
     showMenu()
 end)
 
-print("[Tzuy Hub] ✅ Loaded - No Intro | Infinite Yield Removed | Menu Bg: 123700845345045 | Button: 45x45")
+print("[Tzuy Hub] ✅ Loaded - Bright Blue Text + White Stroke | 52px Buttons")
