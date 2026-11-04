@@ -1,12 +1,12 @@
 -- ================================================
 -- Tzuy Hub - Modern Glassmorphism
 -- Optimized & UNC Compliant Pipeline Version
--- Intro: "TƯ DUY BÁ KHÍ" → VỠ TAN 1600 HẠT → Menu bung ra
+-- No Intro | No Explosion | Direct Open
 -- Style: Tzuy Hub Glassmorphism UI
 -- + Interaction FX: Sound + Hover + Flash
 -- + Toggle Switch cho Noclip + Dynamic Security Bypass
--- + Menu Background: ID 123700845345045 (Sáng & Rõ Nét)
--- + Toggle Button: 42x42
+-- + Menu Background: ID 123700845345045
+-- + Toggle Button: 45x45 | Icon ID 116294082135305
 -- ================================================
 
 -- [SECURITY & PERFORMANCE BYPASS LAYER]
@@ -57,7 +57,7 @@ if not playerGui then
     end
 end
 
-local IMAGE_ICON = "rbxthumb://type=Asset&id=83345601334673&w=150&h=150"
+local IMAGE_ICON = "rbxthumb://type=Asset&id=116294082135305&w=150&h=150"
 
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "TzuyHubGui"
@@ -84,17 +84,17 @@ local function playSfx(soundId, volume, pitch)
     end)
 end
 
--- ================= NÚT BẤM NGOÀI (42x42) =================
+-- ================= NÚT BẤM NGOÀI (45x45) =================
 local button = Instance.new("ImageButton")
 button.Name = "ToggleButton"
-button.Size = UDim2.new(0, 42, 0, 42)
+button.Size = UDim2.new(0, 45, 0, 45)
 button.Position = UDim2.new(0, 15, 0.3, 0)
 button.Image = IMAGE_ICON
 button.BackgroundTransparency = 1
 button.ImageTransparency = 0
 button.ScaleType = Enum.ScaleType.Fit
 button.ZIndex = 100
-button.Visible = false
+button.Visible = true
 button.Parent = screenGui
 
 local btnStroke = Instance.new("UIStroke")
@@ -222,31 +222,6 @@ searchBox.TextSize = 13
 searchBox.TextXAlignment = Enum.TextXAlignment.Left
 searchBox.ZIndex = 53
 searchBox.Parent = searchFrame
-
--- ================= SPLASH =================
-local splashOverlay = Instance.new("Frame")
-splashOverlay.Name = "BaKhiOverlay"
-splashOverlay.Size = UDim2.new(1, 0, 1, 0)
-splashOverlay.BackgroundColor3 = Color3.fromRGB(255, 200, 0)
-splashOverlay.BackgroundTransparency = 1
-splashOverlay.BorderSizePixel = 0
-splashOverlay.ZIndex = 200
-splashOverlay.Parent = screenGui
-
-local baKhiSplash = Instance.new("TextLabel")
-baKhiSplash.Name = "BaKhiText"
-baKhiSplash.Size = UDim2.new(1, 0, 0, 130)
-baKhiSplash.Position = UDim2.new(0, 0, 0.5, -65)
-baKhiSplash.BackgroundTransparency = 1
-baKhiSplash.Text = "TƯ DUY BÁ KHÍ"
-baKhiSplash.TextColor3 = Color3.fromRGB(255, 215, 0)
-baKhiSplash.Font = Enum.Font.GothamBlack
-baKhiSplash.TextSize = 60
-baKhiSplash.TextStrokeTransparency = 0.15
-baKhiSplash.TextStrokeColor3 = Color3.fromRGB(200, 50, 0)
-baKhiSplash.TextTransparency = 1
-baKhiSplash.ZIndex = 201
-baKhiSplash.Parent = screenGui
 
 -- ================= SIDEBAR =================
 local sidebar = Instance.new("ScrollingFrame")
@@ -672,11 +647,6 @@ end)
 -- ================= SETTINGS & GENERAL =================
 addSidebarButton("Settings & General", "⚙️")
 
-addScriptButton("Settings & General", "Infinite Yield", "Bảng lệnh Admin phổ biến (Fly, Noclip, ESP).", function()
-    pcall(function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-    end)
-end)
 addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))()
@@ -778,104 +748,7 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- ================= SPLASH =================
-local function playBaKhiSplash()
-    baKhiSplash.TextTransparency = 1
-    baKhiSplash.TextSize = 20
-    playSfx("rbxassetid://876939830", 0.5, 0.9)
-    TweenService:Create(baKhiSplash, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        TextTransparency = 0,
-        TextSize = 60
-    }):Play()
-end
-
-local function shatterText()
-    baKhiSplash.TextTransparency = 1
-    playSfx("rbxassetid://876939830", 0.55, 1.2)
-
-    task.delay(0.1, function()
-        if button then
-            button.Visible = true
-        end
-    end)
-
-    local flash = Instance.new("Frame")
-    flash.Size = UDim2.new(1, 0, 1, 0)
-    flash.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    flash.BackgroundTransparency = 0.25
-    flash.BorderSizePixel = 0
-    flash.ZIndex = 201
-    flash.Parent = screenGui
-    TweenService:Create(flash, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundTransparency = 1
-    }):Play()
-    task.delay(0.4, function() if flash and flash.Parent then flash:Destroy() end end)
-
-    splashOverlay.BackgroundTransparency = 0.9
-    TweenService:Create(splashOverlay, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundTransparency = 1
-    }):Play()
-
-    local PARTICLE_COUNT = 1600
-    local BATCHES = 4
-    local perBatch = PARTICLE_COUNT / BATCHES
-
-    local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920, 1080)
-    local MAX_DISTANCE = math.sqrt(vp.X * vp.X + vp.Y * vp.Y) * 0.5
-
-    for b = 1, BATCHES do
-        task.delay((b - 1) * 0.05, function()
-            for i = 1, perBatch do
-                local p = Instance.new("Frame")
-                p.AnchorPoint = Vector2.new(0.5, 0.5)
-                local size = math.random(1, 3)
-                p.Size = UDim2.new(0, size, 0, size)
-                p.Position = UDim2.new(0.5, math.random(-380, 380), 0.5, math.random(-70, 70))
-                local roll = math.random()
-                local color
-                if roll < 0.55 then
-                    color = Color3.fromRGB(255, math.random(190, 245), math.random(0, 80))
-                elseif roll < 0.78 then
-                    color = Color3.fromRGB(255, math.random(100, 170), 0)
-                elseif roll < 0.92 then
-                    color = Color3.fromRGB(255, 240, 200)
-                else
-                    color = Color3.fromRGB(255, math.random(60, 120), 0)
-                end
-                p.BackgroundColor3 = color
-                p.BackgroundTransparency = 0
-                p.BorderSizePixel = 0
-                p.ZIndex = 202
-                p.Parent = screenGui
-                Instance.new("UICorner", p).CornerRadius = UDim.new(1, 0)
-
-                local angle    = math.random() * math.pi * 2
-                local distance = math.random(220, math.floor(MAX_DISTANCE))
-                local dx = math.cos(angle) * distance
-                local dy = math.sin(angle) * distance
-                if math.random() < 0.40 then dy = dy + math.random(100, 500) end
-
-                local dur  = math.random(180, 510) / 100
-                local ease = (math.random() < 0.5) and Enum.EasingStyle.Quad or Enum.EasingStyle.Quart
-
-                TweenService:Create(p, TweenInfo.new(dur, ease, Enum.EasingDirection.Out), {
-                    Position = UDim2.new(0.5, dx, 0.5, dy),
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(0, 1, 0, 1)
-                }):Play()
-
-                task.delay(dur + 0.2, function() if p and p.Parent then p:Destroy() end end)
-            end
-        end)
-    end
-
-    task.delay(6, function()
-        if splashOverlay and splashOverlay.Parent then splashOverlay:Destroy() end
-        if baKhiSplash  and baKhiSplash.Parent  then baKhiSplash:Destroy()  end
-    end)
-end
-
--- ================= MỞ / ĐÓNG MENU =================
+-- ================= MỞ / ĐÓNG MENU (KHÔNG INTRO) =================
 local function showMenu()
     mainFrame.Visible = true
     isAnimating = true
@@ -907,11 +780,8 @@ local function hideMenu()
 end
 
 -- ================= TOGGLE =================
-local introActive = true
-
 button.MouseButton1Click:Connect(function()
     if wasDragged then wasDragged = false; return end
-    introActive = false
     playSfx(SFX_WHOOSH, 0.4)
     if mainFrame.Visible then
         hideMenu()
@@ -920,17 +790,10 @@ button.MouseButton1Click:Connect(function()
     end
 end)
 
--- ================= INTRO =================
+-- ================= AUTO MỞ MENU NGAY KHI LOAD =================
 task.spawn(function()
-    task.wait(0.3)
-    if not introActive then return end
-    playBaKhiSplash()
-    task.wait(1.3)
-    if not introActive then return end
-    shatterText()
-    task.wait(0.9)
-    introActive = false
-    if not mainFrame.Visible then showMenu() end
+    task.wait(0.1)
+    showMenu()
 end)
 
-print("[Tzuy Hub] ✅ Đã load - Menu Bg: 123700845345045 | Button: 42x42 | Border Rainbow Auto")
+print("[Tzuy Hub] ✅ Loaded - No Intro | Infinite Yield Removed | Menu Bg: 123700845345045 | Button: 45x45")
