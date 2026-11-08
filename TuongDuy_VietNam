@@ -1,10 +1,10 @@
 -- ================================================
--- Tzuy Hub - Modern Glassmorphism
+-- Tzuy Hub - Modern Dark Theme
 -- No Intro | No Explosion | Direct Open
 -- + Tên tính năng: XANH DƯƠNG SÁNG + viền trắng
 -- + Bỏ desc, tên to 17, khung click 52px
--- + Added: Vzeze Hub | Bacon Hub | Redz Hub v2
--- + Menu Bg: 123700845345045 | Button: 45x45
+-- + Đã xóa viền cầu vồng & ảnh nền (Dùng nền tối)
+-- + Cập nhật Redz Hub | Thêm Tay Hub Premium
 -- ================================================
 
 -- [SECURITY & PERFORMANCE BYPASS LAYER]
@@ -93,7 +93,7 @@ button.Visible = true
 button.Parent = screenGui
 
 local btnStroke = Instance.new("UIStroke")
-btnStroke.Color = Color3.fromRGB(0, 170, 255)
+btnStroke.Color = TEXT_BLUE_BRIGHT -- Đã xóa cầu vồng, đổi sang xanh tĩnh
 btnStroke.Thickness = 1.8
 btnStroke.Parent = button
 
@@ -101,48 +101,20 @@ local btnCorner = Instance.new("UICorner")
 btnCorner.CornerRadius = UDim.new(0, 10)
 btnCorner.Parent = button
 
-local mainStroke
-local isRainbowBorder = true
-local rainbowSpeed = 0.4
-local hue = 0
-
-RunService.RenderStepped:Connect(function(dt)
-    if isRainbowBorder then
-        hue = (hue + dt * rainbowSpeed) % 1
-        local rainbowColor = Color3.fromHSV(hue, 1, 1)
-        btnStroke.Color = rainbowColor
-        if mainStroke then mainStroke.Color = rainbowColor end
-    end
-end)
-
 -- ================= KHUNG MENU CHÍNH =================
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.Size = UDim2.new(0, 880, 0, 540)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 30, 42)
-mainFrame.BackgroundTransparency = 0.75
+-- 🔥 GIAO DIỆN BÌNH THƯỜNG (Xóa ảnh nền, dùng màu tối)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 28) 
+mainFrame.BackgroundTransparency = 0.05 
 mainFrame.BorderSizePixel = 0
 mainFrame.Visible = false
 mainFrame.ZIndex = 50
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
-
--- 🔥 HÌNH NỀN MENU (ID 123700845345045) 🔥
-local menuBgImage = Instance.new("ImageLabel")
-menuBgImage.Name = "MenuBgImage"
-menuBgImage.Size = UDim2.new(1, 0, 1, 0)
-menuBgImage.BackgroundTransparency = 1
-menuBgImage.Image = "rbxthumb://type=Asset&id=123700845345045&w=420&h=420"
-menuBgImage.ScaleType = Enum.ScaleType.Crop
-menuBgImage.ImageTransparency = 0
-menuBgImage.ZIndex = 50
-menuBgImage.Parent = mainFrame
-
-local bgCorner = Instance.new("UICorner")
-bgCorner.CornerRadius = UDim.new(0, 16)
-bgCorner.Parent = menuBgImage
 
 local uiScale = Instance.new("UIScale")
 uiScale.Parent = mainFrame
@@ -151,9 +123,9 @@ local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 16)
 mainCorner.Parent = mainFrame
 
-mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.fromRGB(255, 255, 255)
-mainStroke.Transparency = 0.4
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = Color3.fromRGB(60, 65, 80) -- Viền xám tĩnh
+mainStroke.Transparency = 0.2
 mainStroke.Thickness = 1.7
 mainStroke.Parent = mainFrame
 
@@ -170,12 +142,12 @@ titleText.Size = UDim2.new(0, 220, 1, 0)
 titleText.Position = UDim2.new(0, 20, 0, 0)
 titleText.BackgroundTransparency = 1
 titleText.Text = "Tzuy Hub"
-titleText.TextColor3 = TEXT_BLACK
+titleText.TextColor3 = TEXT_WHITE
 titleText.Font = Enum.Font.GothamBlack
 titleText.TextSize = 22
 titleText.TextXAlignment = Enum.TextXAlignment.Left
-titleText.TextStrokeTransparency = 0.45
-titleText.TextStrokeColor3 = TEXT_WHITE
+titleText.TextStrokeTransparency = 0.5
+titleText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
 titleText.ZIndex = 52
 titleText.Parent = header
 
@@ -183,8 +155,8 @@ local searchFrame = Instance.new("Frame")
 searchFrame.Name = "SearchFrame"
 searchFrame.Size = UDim2.new(0, 320, 0, 34)
 searchFrame.Position = UDim2.new(0, 235, 0.5, -17)
-searchFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-searchFrame.BackgroundTransparency = 0.88
+searchFrame.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+searchFrame.BackgroundTransparency = 0
 searchFrame.BorderSizePixel = 0
 searchFrame.ZIndex = 52
 searchFrame.Parent = header
@@ -192,8 +164,8 @@ searchFrame.Parent = header
 Instance.new("UICorner", searchFrame).CornerRadius = UDim.new(0, 8)
 
 local searchStroke = Instance.new("UIStroke")
-searchStroke.Color = Color3.fromRGB(0, 0, 0)
-searchStroke.Transparency = 0.55
+searchStroke.Color = Color3.fromRGB(60, 65, 80)
+searchStroke.Transparency = 0.5
 searchStroke.Thickness = 1
 searchStroke.Parent = searchFrame
 
@@ -202,7 +174,7 @@ searchIcon.Size = UDim2.new(0, 30, 1, 0)
 searchIcon.BackgroundTransparency = 1
 searchIcon.Text = "🔍"
 searchIcon.TextSize = 13
-searchIcon.TextColor3 = TEXT_BLACK
+searchIcon.TextColor3 = TEXT_WHITE
 searchIcon.ZIndex = 53
 searchIcon.Parent = searchFrame
 
@@ -212,9 +184,9 @@ searchBox.Size = UDim2.new(1, -35, 1, 0)
 searchBox.Position = UDim2.new(0, 30, 0, 0)
 searchBox.BackgroundTransparency = 1
 searchBox.PlaceholderText = "Tìm kiếm tính năng..."
-searchBox.PlaceholderColor3 = Color3.fromRGB(70, 75, 90)
+searchBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 160)
 searchBox.Text = ""
-searchBox.TextColor3 = TEXT_BLACK
+searchBox.TextColor3 = TEXT_WHITE
 searchBox.Font = Enum.Font.GothamBold
 searchBox.TextSize = 13
 searchBox.TextXAlignment = Enum.TextXAlignment.Left
@@ -262,7 +234,7 @@ local function createTabContent(name)
     sf.BackgroundTransparency = 1
     sf.BorderSizePixel = 0
     sf.ScrollBarThickness = 4
-    sf.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
+    sf.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
     sf.Visible = false
     sf.ZIndex = 52
     sf.Parent = contentContainer
@@ -575,9 +547,10 @@ end)
 -- ================= NHÓM CHỨC NĂNG =================
 addSidebarButton("Blox Fruits", "⚔️")
 
+-- 🔥 ĐÃ CẬP NHẬT REDZ HUB
 addScriptButton("Blox Fruits", "Redz Hub", "Hub đa chức năng Blox Fruits (v2).", function()
     pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/trulyouo/RedZ-Hub/refs/heads/main/redz-v2"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/redzx999/redzhub/refs/heads/main/main.luau"))()
     end)
 end)
 
@@ -604,6 +577,14 @@ addScriptButton("Blox Fruits", "Bacon Hub", "Hub đa chức năng cho Blox Fruit
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BaconHub/hack/refs/heads/main/BaconHub.lua"))()
     end)
 end)
+
+-- 🔥 ĐÃ THÊM TAY HUB PREMIUM
+addScriptButton("Blox Fruits", "Tay Hub Premium", "Hub Premium Blox Fruits.", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/VTDROBLOX/Animehub/refs/heads/main/Tayhub-PREMIUM.lua"))()
+    end)
+end)
+
 
 addSidebarButton("Auto Hop (BF)", "🌐")
 addScriptButton("Auto Hop (BF)", "Teddy Hop", "", function()
@@ -758,8 +739,8 @@ local function showMenu()
     mainStroke.Transparency = 1
 
     TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = baseScale }):Play()
-    TweenService:Create(mainFrame, TweenInfo.new(0.3), { BackgroundTransparency = 0.75 }):Play()
-    TweenService:Create(mainStroke, TweenInfo.new(0.3), { Transparency = 0.4 }):Play()
+    TweenService:Create(mainFrame, TweenInfo.new(0.3), { BackgroundTransparency = 0.05 }):Play()
+    TweenService:Create(mainStroke, TweenInfo.new(0.3), { Transparency = 0.2 }):Play()
 
     button.Visible = true
     button.ImageTransparency = 0
@@ -795,4 +776,4 @@ task.spawn(function()
     showMenu()
 end)
 
-print("[Tzuy Hub] ✅ Loaded - Bright Blue Text + White Stroke | 52px Buttons")
+print("[Tzuy Hub] ✅ Loaded - Dark Theme | No Rainbow | Redz V2 + Tay Hub")
