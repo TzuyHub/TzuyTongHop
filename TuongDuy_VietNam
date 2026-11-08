@@ -1,10 +1,9 @@
 -- ================================================
--- Tzuy Hub - Modern Dark Theme
+-- Tzuy Hub - Modern Dark Theme (Mixed Menu)
 -- No Intro | No Explosion | Direct Open
--- + Tên tính năng: XANH DƯƠNG SÁNG + viền trắng
--- + Bỏ desc, tên to 17, khung click 52px
--- + Đã xóa viền cầu vồng & ảnh nền (Dùng nền tối)
--- + Cập nhật Redz Hub | Thêm Tay Hub Premium
+-- ✅ Blox Fruit: Danh mục (Accordion)
+-- ✅ Steal Egg & Settings: Tab phẳng bình thường
+-- ✅ Fix lỗi chồng chéo giao diện (Layout Overlap)
 -- ================================================
 
 -- [SECURITY & PERFORMANCE BYPASS LAYER]
@@ -35,8 +34,9 @@ local player        = Players.LocalPlayer
 -- ================= MÀU CHỮ =================
 local TEXT_BLACK       = Color3.fromRGB(15, 15, 20)
 local TEXT_PURE_BLACK  = Color3.fromRGB(0, 0, 0)
-local TEXT_BLUE_BRIGHT = Color3.fromRGB(0, 170, 255)   -- 🔵 Xanh dương sáng
+local TEXT_BLUE_BRIGHT = Color3.fromRGB(0, 170, 255)
 local TEXT_WHITE       = Color3.fromRGB(255, 255, 255)
+local TEXT_GREY_LIGHT  = Color3.fromRGB(200, 200, 210)
 
 -- UI Container Selection
 local playerGui
@@ -93,7 +93,7 @@ button.Visible = true
 button.Parent = screenGui
 
 local btnStroke = Instance.new("UIStroke")
-btnStroke.Color = TEXT_BLUE_BRIGHT -- Đã xóa cầu vồng, đổi sang xanh tĩnh
+btnStroke.Color = TEXT_BLUE_BRIGHT
 btnStroke.Thickness = 1.8
 btnStroke.Parent = button
 
@@ -107,7 +107,6 @@ mainFrame.Name = "MainFrame"
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.Size = UDim2.new(0, 880, 0, 540)
--- 🔥 GIAO DIỆN BÌNH THƯỜNG (Xóa ảnh nền, dùng màu tối)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 22, 28) 
 mainFrame.BackgroundTransparency = 0.05 
 mainFrame.BorderSizePixel = 0
@@ -124,7 +123,7 @@ mainCorner.CornerRadius = UDim.new(0, 16)
 mainCorner.Parent = mainFrame
 
 local mainStroke = Instance.new("UIStroke")
-mainStroke.Color = Color3.fromRGB(60, 65, 80) -- Viền xám tĩnh
+mainStroke.Color = Color3.fromRGB(60, 65, 80)
 mainStroke.Transparency = 0.2
 mainStroke.Thickness = 1.7
 mainStroke.Parent = mainFrame
@@ -258,18 +257,29 @@ local function switchTab(name)
     end
     for btnName, btn in pairs(tabButtons) do
         if btnName == name then
+            -- Khi được chọn
             btn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
             btn.BackgroundTransparency = 0.15
             btn.TextColor3 = TEXT_PURE_BLACK
         else
-            btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundTransparency = 0.85
-            btn.TextColor3 = TEXT_BLACK
+            -- Khi không được chọn
+            if btn:GetAttribute("IsSubTab") then
+                -- Style cho Tab con (Main, Kaitun, Hop)
+                btn.BackgroundColor3 = Color3.fromRGB(35, 40, 50)
+                btn.BackgroundTransparency = 0.3
+                btn.TextColor3 = TEXT_GREY_LIGHT
+            else
+                -- Style cho Tab phẳng (Steal Egg, Settings)
+                btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                btn.BackgroundTransparency = 0.85
+                btn.TextColor3 = TEXT_BLACK
+            end
         end
     end
     activeTab = name
 end
 
+-- ✅ 1. HÀM TẠO TAB PHẲNG BÌNH THƯỜNG (Dành cho Steal Egg, Settings)
 local function addSidebarButton(name, iconText)
     local btn = Instance.new("TextButton")
     btn.Name = name .. "TabBtn"
@@ -296,17 +306,13 @@ local function addSidebarButton(name, iconText)
 
     btn.MouseEnter:Connect(function()
         if activeTab ~= name then
-            TweenService:Create(btn, TweenInfo.new(0.15), {
-                BackgroundTransparency = 0.7
-            }):Play()
+            TweenService:Create(btn, TweenInfo.new(0.15), { BackgroundTransparency = 0.7 }):Play()
         end
     end)
 
     btn.MouseLeave:Connect(function()
         if activeTab ~= name then
-            TweenService:Create(btn, TweenInfo.new(0.15), {
-                BackgroundTransparency = 0.85
-            }):Play()
+            TweenService:Create(btn, TweenInfo.new(0.15), { BackgroundTransparency = 0.85 }):Play()
         end
     end)
 
@@ -321,7 +327,103 @@ local function addSidebarButton(name, iconText)
     createTabContent(name)
 end
 
--- ================= NÚT SCRIPT THƯỜNG (52px, không desc, xanh dương sáng) =================
+-- ✅ 2. HÀM TẠO DANH MỤC MẸ (Dành riêng cho Blox Fruit)
+local function addCategory(name, iconText)
+    local btn = Instance.new("TextButton")
+    btn.Name = name .. "Category"
+    btn.Size = UDim2.new(1, -5, 0, 42)
+    btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    btn.BackgroundTransparency = 0.85
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.ZIndex = 52
+    
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -40, 1, 0)
+    lbl.Position = UDim2.new(0, 10, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "  " .. iconText .. "   " .. name
+    lbl.TextColor3 = TEXT_BLACK
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 14
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.ZIndex = 53
+    lbl.Parent = btn
+    
+    local arrow = Instance.new("TextLabel")
+    arrow.Size = UDim2.new(0, 30, 1, 0)
+    arrow.Position = UDim2.new(1, -35, 0, 0)
+    arrow.BackgroundTransparency = 1
+    arrow.Text = "▼"
+    arrow.TextColor3 = TEXT_BLACK
+    arrow.Font = Enum.Font.GothamBold
+    arrow.TextSize = 14
+    arrow.ZIndex = 53
+    arrow.Parent = btn
+    
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(0, 0, 0)
+    stroke.Transparency = 0.75
+    stroke.Parent = btn
+    
+    btn.Parent = sidebar
+    
+    local container = Instance.new("Frame")
+    container.Name = name .. "Container"
+    container.Size = UDim2.new(1, 0, 0, 0)
+    container.AutomaticSize = Enum.AutomaticSize.Y 
+    container.BackgroundTransparency = 1
+    container.ZIndex = 51
+    container.Parent = sidebar
+    
+    local cLayout = Instance.new("UIListLayout")
+    cLayout.Padding = UDim.new(0, 4)
+    cLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    cLayout.Parent = container
+    
+    local isOpen = true
+    btn.MouseButton1Click:Connect(function()
+        playSfx(SFX_CLICK, 0.3)
+        isOpen = not isOpen
+        container.Visible = isOpen
+        arrow.Text = isOpen and "▼" or "▶"
+    end)
+    
+    return container
+end
+
+-- ✅ 3. HÀM TẠO TAB CON (Nằm trong Blox Fruit)
+local function addSubTabButton(parentContainer, name, iconText)
+    local btn = Instance.new("TextButton")
+    btn.Name = name .. "TabBtn"
+    btn.Size = UDim2.new(1, -20, 0, 38)
+    btn.Position = UDim2.new(0, 10, 0, 0) 
+    btn.BackgroundColor3 = Color3.fromRGB(35, 40, 50)
+    btn.BackgroundTransparency = 0.3
+    btn.Text = "  " .. (iconText or "•") .. "   " .. name
+    btn.TextColor3 = TEXT_GREY_LIGHT
+    btn.Font = Enum.Font.GothamMedium
+    btn.TextSize = 13
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.ZIndex = 52
+    btn.AutoButtonColor = false
+    btn:SetAttribute("IsSubTab", true)
+    
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+    
+    btn.MouseButton1Click:Connect(function()
+        playSfx(SFX_CLICK, 0.3)
+        searchBox.Text = ""
+        switchTab(name)
+    end)
+    
+    btn.Parent = parentContainer
+    tabButtons[name] = btn
+    createTabContent(name)
+end
+
+-- ================= NÚT SCRIPT THƯỜNG =================
 local function addScriptButton(tabName, title, desc, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -348,44 +450,34 @@ local function addScriptButton(tabName, title, desc, callback)
     tLbl.Position = UDim2.new(0, 15, 0, 0)
     tLbl.BackgroundTransparency = 1
     tLbl.Text = title
-    tLbl.TextColor3 = TEXT_BLUE_BRIGHT           -- 🔵 XANH DƯƠNG SÁNG
+    tLbl.TextColor3 = TEXT_BLUE_BRIGHT
     tLbl.Font = Enum.Font.GothamBlack
     tLbl.TextSize = 17
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
     tLbl.TextYAlignment = Enum.TextYAlignment.Center
-    tLbl.TextStrokeTransparency = 0.3             -- Viền trắng đậm
+    tLbl.TextStrokeTransparency = 0.3
     tLbl.TextStrokeColor3 = TEXT_WHITE
     tLbl.ZIndex = 54
     tLbl.Parent = btn
 
     local itemData = {
-        Button = btn,
-        Stroke = stroke,
-        Title = string.lower(title),
-        Desc = string.lower(desc or ""),
+        Button = btn, Stroke = stroke,
+        Title = string.lower(title), Desc = string.lower(desc or ""),
         TabName = tabName
     }
     table.insert(allScriptButtons, itemData)
 
     btn.MouseEnter:Connect(function()
         if not btn:GetAttribute("Active") then
-            TweenService:Create(btn, TweenInfo.new(0.18), {
-                BackgroundTransparency = 0.7
-            }):Play()
-            TweenService:Create(stroke, TweenInfo.new(0.18), {
-                Transparency = 0.4
-            }):Play()
+            TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.7 }):Play()
+            TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
         end
     end)
 
     btn.MouseLeave:Connect(function()
         if not btn:GetAttribute("Active") then
-            TweenService:Create(btn, TweenInfo.new(0.18), {
-                BackgroundTransparency = 0.82
-            }):Play()
-            TweenService:Create(stroke, TweenInfo.new(0.18), {
-                Transparency = 0.7
-            }):Play()
+            TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.82 }):Play()
+            TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
         end
     end)
 
@@ -399,9 +491,7 @@ local function addScriptButton(tabName, title, desc, callback)
                     BackgroundColor3 = Color3.fromRGB(255, 255, 255),
                     BackgroundTransparency = 0.82
                 }):Play()
-                TweenService:Create(item.Stroke, TweenInfo.new(0.2), {
-                    Transparency = 0.7
-                }):Play()
+                TweenService:Create(item.Stroke, TweenInfo.new(0.2), { Transparency = 0.7 }):Play()
             end
         end
 
@@ -410,9 +500,7 @@ local function addScriptButton(tabName, title, desc, callback)
             BackgroundColor3 = Color3.fromRGB(0, 140, 255),
             BackgroundTransparency = 0.15
         }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {
-            Transparency = 0.05
-        }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.2), { Transparency = 0.05 }):Play()
 
         task.spawn(function()
             local flash = Instance.new("Frame")
@@ -423,9 +511,7 @@ local function addScriptButton(tabName, title, desc, callback)
             flash.ZIndex = 60
             flash.Parent = btn
             Instance.new("UICorner", flash).CornerRadius = UDim.new(0, 10)
-            TweenService:Create(flash, TweenInfo.new(0.35), {
-                BackgroundTransparency = 1
-            }):Play()
+            TweenService:Create(flash, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
             task.delay(0.4, function() if flash and flash.Parent then flash:Destroy() end end)
         end)
 
@@ -435,7 +521,7 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.Parent = tabFrame
 end
 
--- ================= NÚT TOGGLE (52px, không desc, xanh dương sáng) =================
+-- ================= NÚT TOGGLE =================
 local function addToggleButton(tabName, title, desc, initialState, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -464,7 +550,7 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
     tLbl.Position = UDim2.new(0, 15, 0, 0)
     tLbl.BackgroundTransparency = 1
     tLbl.Text = title
-    tLbl.TextColor3 = TEXT_BLUE_BRIGHT           -- 🔵 XANH DƯƠNG SÁNG
+    tLbl.TextColor3 = TEXT_BLUE_BRIGHT
     tLbl.Font = Enum.Font.GothamBlack
     tLbl.TextSize = 17
     tLbl.TextXAlignment = Enum.TextXAlignment.Left
@@ -493,30 +579,19 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
     Instance.new("UICorner", thumb).CornerRadius = UDim.new(1, 0)
 
     table.insert(allScriptButtons, {
-        Button = btn,
-        Stroke = stroke,
-        Title = string.lower(title),
-        Desc = string.lower(desc or ""),
-        TabName = tabName,
-        IsToggle = true
+        Button = btn, Stroke = stroke,
+        Title = string.lower(title), Desc = string.lower(desc or ""),
+        TabName = tabName, IsToggle = true
     })
 
     btn.MouseEnter:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.18), {
-            BackgroundTransparency = 0.7
-        }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.18), {
-            Transparency = 0.4
-        }):Play()
+        TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.7 }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
     end)
 
     btn.MouseLeave:Connect(function()
-        TweenService:Create(btn, TweenInfo.new(0.18), {
-            BackgroundTransparency = 0.82
-        }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.18), {
-            Transparency = 0.7
-        }):Play()
+        TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.82 }):Play()
+        TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
     end)
 
     btn.MouseButton1Click:Connect(function()
@@ -544,101 +619,80 @@ searchBox:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- ================= NHÓM CHỨC NĂNG =================
-addSidebarButton("Blox Fruits", "⚔️")
+-- ================= CẤU TRÚC MENU =================
 
--- 🔥 ĐÃ CẬP NHẬT REDZ HUB
-addScriptButton("Blox Fruits", "Redz Hub", "Hub đa chức năng Blox Fruits (v2).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/redzx999/redzhub/refs/heads/main/main.luau"))()
-    end)
+-- 🍎 DANH MỤC: BLOX FRUIT (Có Accordion)
+local bfContainer = addCategory("Blox Fruit", "🍎")
+addSubTabButton(bfContainer, "Main", "⚔️")
+addSubTabButton(bfContainer, "Kaitun", "🐉")
+addSubTabButton(bfContainer, "Hop Sever", "🌐")
+
+-- ⚔️ NỘI DUNG TAB MAIN
+addScriptButton("Main", "Redz Hub", "Hub đa chức năng Blox Fruits.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/redzx999/redzhub/refs/heads/main/main.luau"))() end)
+end)
+addScriptButton("Main", "RealKid", "Hub đa chức năng Blox Fruits.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/BloxFruits.lua"))() end)
+end)
+addScriptButton("Main", "Teddy Hub", "Hub đa chức năng Blox Fruits.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/TeddyHub.lua"))() end)
+end)
+addScriptButton("Main", "Vzeze Hub", "Hub đa chức năng Blox Fruits.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/VxezeHubLoader/refs/heads/main/MainHub.lua"))() end)
+end)
+addScriptButton("Main", "Bacon Hub", "Hub đa chức năng Blox Fruits.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BaconHub/hack/refs/heads/main/BaconHub.lua"))() end)
+end)
+addScriptButton("Main", "Tay Hub Premium", "Hub Premium Blox Fruits.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/VTDROBLOX/Animehub/refs/heads/main/Tayhub-PREMIUM.lua"))() end)
 end)
 
-addScriptButton("Blox Fruits", "RealKid", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/BloxFruits.lua"))()
-    end)
+-- 🐉 NỘI DUNG TAB KAITUN
+addScriptButton("Kaitun", "Kaitun Halloween", "Auto farm Kaitun mùa Halloween.", function()
+    pcall(function() loadstring(game:HttpGet("https://pastefy.app/yZsSI5Xg/raw"))() end)
 end)
 
-addScriptButton("Blox Fruits", "Teddy Hub", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/TeddyHub.lua"))()
-    end)
-end)
-
-addScriptButton("Blox Fruits", "Vzeze Hub", "Hub đa chức năng cho Blox Fruits.", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dex-Bear/VxezeHubLoader/refs/heads/main/MainHub.lua"))()
-    end)
-end)
-
-addScriptButton("Blox Fruits", "Bacon Hub", "Hub đa chức năng cho Blox Fruits.", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Dev-BaconHub/hack/refs/heads/main/BaconHub.lua"))()
-    end)
-end)
-
--- 🔥 ĐÃ THÊM TAY HUB PREMIUM
-addScriptButton("Blox Fruits", "Tay Hub Premium", "Hub Premium Blox Fruits.", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/VTDROBLOX/Animehub/refs/heads/main/Tayhub-PREMIUM.lua"))()
-    end)
-end)
-
-
-addSidebarButton("Auto Hop (BF)", "🌐")
-addScriptButton("Auto Hop (BF)", "Teddy Hop", "", function()
+-- 🌐 NỘI DUNG TAB HOP SEVER
+addScriptButton("Hop Sever", "Teddy Hop", "Auto hop server.", function()
     pcall(function()
         repeat task.wait() until game:IsLoaded() and game:GetService("Players") and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui")
         loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/HopBoss.lua"))()
     end)
 end)
-addScriptButton("Auto Hop (BF)", "RealKid Hop", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/RealKidHop.lua"))()
-    end)
+addScriptButton("Hop Sever", "RealKid Hop", "Auto hop server.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/realkid/refs/heads/main/RealKidHop.lua"))() end)
 end)
-addScriptButton("Auto Hop (BF)", "Night Hop (Key)", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/HopScript.luau"))()
-    end)
+addScriptButton("Hop Sever", "Night Hop (Key)", "Auto hop server.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/HopScript.luau"))() end)
 end)
 
-addSidebarButton("Steal An Egg", "🥚")
-addScriptButton("Steal An Egg", "RealKid", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))()
-    end)
+
+-- 🥚 TAB PHẲNG: STEAL EGG (Không dùng Accordion)
+addSidebarButton("Steal Egg", "🥚")
+
+addScriptButton("Steal Egg", "RealKid", "Auto Steal Egg.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))() end)
 end)
-addScriptButton("Steal An Egg", "Teddy Hub", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/StealAnEgg.lua"))()
-    end)
+addScriptButton("Steal Egg", "Teddy Hub", "Auto Steal Egg.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/StealAnEgg.lua"))() end)
 end)
-addScriptButton("Steal An Egg", "Night Hub", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))()
-    end)
+addScriptButton("Steal Egg", "Night Hub", "Auto Steal Egg.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))() end)
 end)
-addScriptButton("Steal An Egg", "Chilli v8", "", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyTongHop/refs/heads/main/protected_script_1793439721869.luau.txt"))()
-    end)
+addScriptButton("Steal Egg", "Chilli v8", "Auto Steal Egg.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyTongHop/refs/heads/main/protected_script_1793439721869.luau.txt"))() end)
 end)
 
--- ================= SETTINGS & GENERAL =================
-addSidebarButton("Settings & General", "⚙️")
 
-addScriptButton("Settings & General", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))()
-    end)
+-- ⚙️ TAB PHẲNG: SETTINGS (Không dùng Accordion)
+addSidebarButton("Settings", "⚙️")
+
+addScriptButton("Settings", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))() end)
 end)
 
--- ================= NOCLIP - DẠNG CÔNG TẮC =================
 local noclipActive = false
 local noclipConnection = nil
-
 local function toggleNoclipState(state)
     noclipActive = state
     if noclipActive then
@@ -660,12 +714,12 @@ local function toggleNoclipState(state)
         end
     end
 end
-
-addToggleButton("Settings & General", "Toggle Noclip", "Bật/Tắt đi xuyên tường", false, function(state)
+addToggleButton("Settings", "Toggle Noclip", "Bật/Tắt đi xuyên tường", false, function(state)
     toggleNoclipState(state)
 end)
 
-switchTab("Blox Fruits")
+-- Khởi tạo Tab mặc định
+switchTab("Main")
 
 -- ================= RESPONSIVE =================
 local isAnimating = false
@@ -776,4 +830,4 @@ task.spawn(function()
     showMenu()
 end)
 
-print("[Tzuy Hub] ✅ Loaded - Dark Theme | No Rainbow | Redz V2 + Tay Hub")
+print("[Tzuy Hub] ✅ Loaded - Mixed Menu (Blox Fruit = Category | Others = Flat Tabs)")
