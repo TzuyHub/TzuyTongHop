@@ -759,6 +759,23 @@ addScriptButton("Kaitun", "Kaitun Arvyn", "Auto farm Kaitun Arvyn (tối ưu, t�
     end)
 end)
 
+addScriptButton("Kaitun", "Kaitun Race v4 RealKid", "Auto farm Kaitun Race v4 (RealKid).", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-RaceV4-RealKid"))()
+    end)
+end)
+addScriptButton("Kaitun", "Kaitun Leviathan RealKid", "Auto farm Kaitun Leviathan (RealKid).", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-LeviaThan-RealKid"))()
+    end)
+end)
+addScriptButton("Kaitun", "Kaitun Dungeon", "Auto farm Kaitun Dungeon (RealKid).", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-Dungeon-RealKid"))()
+    end)
+end)
+
+
 -- 🌐 NỘI DUNG TAB HOP SERVER
 addScriptButton("Hop Server", "Teddy Hop", "Auto hop server.", function()
     pcall(function()
@@ -776,11 +793,10 @@ end)
 -- 🥚 TAB PHẲNG: STEAL A EGG
 addSidebarButton("Steal a Egg", "🥚")
 
--- ⬇️ ĐÃ ĐƯA LÊN ĐẦU: CHILLI X VENYX V10 ⬇️
+-- Chilli X Venyx v10 (đứng đầu tab)
 addScriptButton("Steal a Egg", "Chilli X Venyx v10", "Tự động trộm trứng (phiên bản v10 mới).", function()
     pcall(function() loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-x-venyx-v10-new-10500"))() end)
 end)
--- ⬆️ ĐÃ ĐƯA LÊN ĐẦU: CHILLI X VENYX V10 ⬆️
 
 addScriptButton("Steal a Egg", "RealKid Egg", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))() end)
