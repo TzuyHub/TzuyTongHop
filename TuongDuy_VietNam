@@ -735,6 +735,11 @@ addScriptButton("Main Blox Fruit", "Arvyn", "Hub đa chức năng Blox Fruits (A
         loadstring(game:HttpGet("https://api.luasentry.com/api/scripts/loader/e664cbd4c071c95381797367d7444a7b.lua"))()
     end)
 end)
+addScriptButton("Main Blox Fruit", "LongHiHi", "Hub đa chức năng Blox Fruits (LongHiHi).", function()
+    pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyHub/refs/heads/main/LongHiHi"))()
+    end)
+end)
 
 -- 🐉 NỘI DUNG TAB KAITUN
 addScriptButton("Kaitun", "Kaitun Halloween", "Auto farm Kaitun mùa Halloween.", function()
@@ -768,8 +773,15 @@ addScriptButton("Hop Server", "Night Hop (Key)", "Auto hop server.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/HopScript.luau"))() end)
 end)
 
--- 🥚 TAB PHẲNG: STEAL A EGG (đã đổi tên từ "Trộm trứng")
+-- 🥚 TAB PHẲNG: STEAL A EGG
 addSidebarButton("Steal a Egg", "🥚")
+
+-- ⬇️ ĐÃ ĐƯA LÊN ĐẦU: CHILLI X VENYX V10 ⬇️
+addScriptButton("Steal a Egg", "Chilli X Venyx v10", "Tự động trộm trứng (phiên bản v10 mới).", function()
+    pcall(function() loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-x-venyx-v10-new-10500"))() end)
+end)
+-- ⬆️ ĐÃ ĐƯA LÊN ĐẦU: CHILLI X VENYX V10 ⬆️
+
 addScriptButton("Steal a Egg", "RealKid Egg", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))() end)
 end)
@@ -778,9 +790,6 @@ addScriptButton("Steal a Egg", "Teddy Hub Egg", "Tự động trộm trứng.", 
 end)
 addScriptButton("Steal a Egg", "Night Hub Egg", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))() end)
-end)
-addScriptButton("Steal a Egg", "Chilli X Venyx v9", "Tự động trộm trứng.", function()
-    pcall(function() loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/venyx-chilli-v9-ba-khi-909"))() end)
 end)
 
 -- ⚙️ TAB PHẲNG: CÀI ĐẶT
