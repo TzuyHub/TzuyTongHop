@@ -1,5 +1,5 @@
 -- ================================================
--- Tzuy Hub - Fixed + Main TikTok Tab
+-- Tzuy Hub - Fixed + Main TikTok Tab + Scroll
 -- Credit TikTok: tuongduy8a4
 -- ================================================
 
@@ -49,6 +49,7 @@ if not playerGui then
 end
 
 local IMAGE_ICON = "rbxthumb://type=Asset&id=116294082135305&w=150&h=150"
+local TIKTOK_ICON = "rbxassetid://128441949775022"
 
 local screenGui          = Instance.new("ScreenGui")
 screenGui.Name           = "TzuyHubGui"
@@ -195,7 +196,10 @@ sidebar.Size                      = UDim2.new(0, 215, 1, -65)
 sidebar.Position                  = UDim2.new(0, 10, 0, 60)
 sidebar.BackgroundTransparency    = 1
 sidebar.BorderSizePixel           = 0
-sidebar.ScrollBarThickness        = 2
+sidebar.ScrollBarThickness        = 4
+sidebar.ScrollBarImageColor3      = Color3.fromRGB(0, 140, 255)
+sidebar.ScrollingDirection        = Enum.ScrollingDirection.Y
+sidebar.AutomaticCanvasSize       = Enum.AutomaticSize.Y
 sidebar.ZIndex                    = 51
 sidebar.Parent                    = mainFrame
 
@@ -204,16 +208,13 @@ sidebarLayout.Padding         = UDim.new(0, 6)
 sidebarLayout.SortOrder       = Enum.SortOrder.LayoutOrder
 sidebarLayout.Parent          = sidebar
 
-sidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    sidebar.CanvasSize = UDim2.new(0, 0, 0, sidebarLayout.AbsoluteContentSize.Y + 10)
-end)
-
 -- ================= CONTENT =================
 local contentContainer                  = Instance.new("Frame")
 contentContainer.Name                   = "ContentContainer"
 contentContainer.Size                   = UDim2.new(1, -240, 1, -65)
 contentContainer.Position               = UDim2.new(0, 230, 0, 60)
 contentContainer.BackgroundTransparency = 1
+contentContainer.ClipsDescendants       = true
 contentContainer.ZIndex                 = 51
 contentContainer.Parent                 = mainFrame
 
@@ -222,26 +223,35 @@ local tabButtons = {}
 local activeTab = nil
 local allScriptButtons = {}
 
+-- Mỗi tab là một ScrollingFrame: cuộn lên/xuống bằng chuột, cảm ứng hoặc thanh cuộn
 local function createTabContent(name)
-    local sf = Instance.new("ScrollingFrame")
-    sf.Name                = name .. "Content"
-    sf.Size                = UDim2.new(1, 0, 1, 0)
-    sf.BackgroundTransparency = 1
-    sf.BorderSizePixel     = 0
-    sf.ScrollBarThickness  = 4
-    sf.ScrollBarImageColor3= Color3.fromRGB(100, 100, 100)
-    sf.Visible             = false
-    sf.ZIndex              = 52
-    sf.Parent              = contentContainer
+    local sf                        = Instance.new("ScrollingFrame")
+    sf.Name                         = name .. "Content"
+    sf.Size                         = UDim2.new(1, 0, 1, 0)
+    sf.BackgroundTransparency       = 1
+    sf.BorderSizePixel              = 0
+    sf.Visible                      = false
+    sf.ZIndex                       = 52
+    sf.CanvasSize                   = UDim2.new(0, 0, 0, 0)
+    sf.AutomaticCanvasSize          = Enum.AutomaticSize.Y
+    sf.ScrollingDirection           = Enum.ScrollingDirection.Y
+    sf.ScrollBarThickness           = 4
+    sf.ScrollBarImageColor3         = Color3.fromRGB(0, 140, 255)
+    sf.ScrollBarImageTransparency   = 0.1
+    sf.ScrollingEnabled             = true
+    sf.ElasticBehavior              = Enum.ElasticBehavior.WhenScrollable
+    sf.Parent                       = contentContainer
 
     local layout         = Instance.new("UIListLayout")
     layout.Padding       = UDim.new(0, 8)
     layout.SortOrder     = Enum.SortOrder.LayoutOrder
     layout.Parent        = sf
 
-    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        sf.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 20)
-    end)
+    local padding            = Instance.new("UIPadding")
+    padding.PaddingTop       = UDim.new(0, 4)
+    padding.PaddingBottom    = UDim.new(0, 10)
+    padding.PaddingRight     = UDim.new(0, 8)
+    padding.Parent           = sf
 
     tabs[name] = sf
     return sf
@@ -250,6 +260,9 @@ end
 local function switchTab(name)
     for tabName, frame in pairs(tabs) do
         frame.Visible = (tabName == name)
+        if tabName == name then
+            frame.CanvasPosition = Vector2.new(0, 0)
+        end
     end
     for btnName, btn in pairs(tabButtons) do
         if btnName == name then
@@ -344,10 +357,11 @@ local function addCategory(name, iconText)
     arrow.Size                    = UDim2.new(0, 30, 1, 0)
     arrow.Position                = UDim2.new(1, -35, 0, 0)
     arrow.BackgroundTransparency  = 1
-    arrow.Text                    = "▼"
+    arrow.Text                    = "×"
     arrow.TextColor3              = TEXT_BLACK
     arrow.Font                    = Enum.Font.GothamBold
-    arrow.TextSize                = 14
+    arrow.TextSize                = 22
+    arrow.TextXAlignment          = Enum.TextXAlignment.Center
     arrow.ZIndex                  = 53
     arrow.Parent                  = btn
 
@@ -372,12 +386,21 @@ local function addCategory(name, iconText)
     cLayout.SortOrder       = Enum.SortOrder.LayoutOrder
     cLayout.Parent          = container
 
+    local cPadding          = Instance.new("UIPadding")
+    cPadding.PaddingLeft    = UDim.new(0, 10)
+    cPadding.Parent         = container
+
     local isOpen = true
     btn.MouseButton1Click:Connect(function()
         playSfx(SFX_CLICK, 0.3)
         isOpen = not isOpen
         container.Visible = isOpen
-        arrow.Text = isOpen and "▼" or "▶"
+
+        if isOpen then
+            arrow.Text = "×"
+        else
+            arrow.Text = "+"
+        end
     end)
 
     return container
@@ -387,8 +410,7 @@ end
 local function addSubTabButton(parentContainer, name, iconText)
     local btn                     = Instance.new("TextButton")
     btn.Name                      = name .. "TabBtn"
-    btn.Size                      = UDim2.new(1, -20, 0, 38)
-    btn.Position                  = UDim2.new(0, 10, 0, 0)
+    btn.Size                      = UDim2.new(1, 0, 0, 38)
     btn.BackgroundColor3          = Color3.fromRGB(35, 40, 50)
     btn.BackgroundTransparency    = 0.3
     btn.Text                      = " " .. (iconText or "•") .. " " .. name
@@ -627,18 +649,24 @@ local function addTikTokCard(tabName)
     stroke.Thickness          = 1
     stroke.Parent             = btn
 
-    local iIcon               = Instance.new("TextLabel")
-    iIcon.Size                = UDim2.new(0, 60, 0, 60)
-    iIcon.Position            = UDim2.new(0, 15, 0.5, -30)
-    iIcon.BackgroundTransparency = 1
-    iIcon.Text                = "🎵"
-    iIcon.TextSize            = 40
+    local iIcon               = Instance.new("ImageLabel")
+    iIcon.Size                = UDim2.new(0, 45, 0, 45)
+    iIcon.Position            = UDim2.new(0, 20, 0.5, -22)
+    iIcon.BackgroundTransparency = 0
+    iIcon.BackgroundColor3    = Color3.fromRGB(0, 0, 0)
+    iIcon.Image               = TIKTOK_ICON
+    iIcon.ScaleType           = Enum.ScaleType.Fit
     iIcon.ZIndex              = 54
+
+    local iconCorner          = Instance.new("UICorner")
+    iconCorner.CornerRadius   = UDim.new(0, 12)
+    iconCorner.Parent         = iIcon
+
     iIcon.Parent              = btn
 
     local iTitle              = Instance.new("TextLabel")
     iTitle.Size               = UDim2.new(1, -90, 0, 32)
-    iTitle.Position           = UDim2.new(0, 85, 0, 20)
+    iTitle.Position           = UDim2.new(0, 80, 0, 20)
     iTitle.BackgroundTransparency = 1
     iTitle.Text               = "TikTok: tuongduy8a4"
     iTitle.TextColor3         = TEXT_BLUE_BRIGHT
@@ -653,9 +681,9 @@ local function addTikTokCard(tabName)
     local iDesc               = Instance.new("TextLabel")
     iDesc.Name                = "Desc"
     iDesc.Size                = UDim2.new(1, -90, 0, 22)
-    iDesc.Position            = UDim2.new(0, 85, 0, 55)
+    iDesc.Position            = UDim2.new(0, 80, 0, 55)
     iDesc.BackgroundTransparency = 1
-    iDesc.Text                = "Nhấn để copy username"
+    iDesc.Text                = "Nhấn để sao chép tên tài khoản TikTok"
     iDesc.TextColor3          = TEXT_PURE_BLACK
     iDesc.Font                = Enum.Font.GothamMedium
     iDesc.TextSize            = 13
@@ -676,14 +704,14 @@ local function addTikTokCard(tabName)
         playSfx(SFX_CLICK, 0.35, 1.05)
         if setclipboard then
             pcall(setclipboard, "tuongduy8a4")
-            iDesc.Text = "✅ Đã copy: tuongduy8a4"
+            iDesc.Text = "✅ Đã sao chép: tuongduy8a4"
             task.delay(2, function()
                 if iDesc and iDesc.Parent then
-                    iDesc.Text = "Nhấn để copy username"
+                    iDesc.Text = "Nhấn để sao chép tên tài khoản TikTok"
                 end
             end)
         else
-            iDesc.Text = "TikTok: tuongduy8a4"
+            iDesc.Text = "TikTok : tuongduy8a4"
         end
     end)
 end
@@ -701,11 +729,9 @@ end)
 
 -- ================== MENU CẤU TRÚC ==================
 
--- 🌟 TAB MAIN (trên cùng sidebar) — credit TikTok
 addSidebarButton("Main", "⭐")
 addTikTokCard("Main")
 
--- 🍎 DANH MỤC: BLOX FRUIT (có Accordion)
 local bfContainer = addCategory("Blox Fruit", "🍎")
 addSubTabButton(bfContainer, "Main Blox Fruit", "⚔️")
 addSubTabButton(bfContainer, "Kaitun", "🐉")
@@ -738,6 +764,14 @@ end)
 addScriptButton("Main Blox Fruit", "LongHiHi", "Hub đa chức năng Blox Fruits (LongHiHi).", function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyHub/refs/heads/main/LongHiHi"))()
+    end)
+end)
+
+addScriptButton("Main Blox Fruit", "Scythe (Crack Banana)", "Script Scythe Crack Banana (loadstring).", function()
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/bloxfruitsnokey/Banana/refs/heads/main/Scythe/v3.luau"))()
+        end)
     end)
 end)
 
@@ -775,7 +809,6 @@ addScriptButton("Kaitun", "Kaitun Dungeon", "Auto farm Kaitun Dungeon (RealKid).
     end)
 end)
 
-
 -- 🌐 NỘI DUNG TAB HOP SERVER
 addScriptButton("Hop Server", "Teddy Hop", "Auto hop server.", function()
     pcall(function()
@@ -798,21 +831,18 @@ addScriptButton("Steal a Egg", "Chilli X Venyx v10", "Tự động trộm trứn
     pcall(function() loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-x-venyx-v10-new-10500"))() end)
 end)
 
-addScriptButton("Steal a Egg", "RealKid Egg", "Tự động trộm trứng.", function()
+addScriptButton("Steal a Egg", "RealKid", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))() end)
 end)
-addScriptButton("Steal a Egg", "Teddy Hub Egg", "Tự động trộm trứng.", function()
+addScriptButton("Steal a Egg", "Teddy Hub", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/StealAnEgg.lua"))() end)
 end)
-addScriptButton("Steal a Egg", "Night Hub Egg", "Tự động trộm trứng.", function()
+addScriptButton("Steal a Egg", "Night Hub", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))() end)
 end)
 
 -- ⚙️ TAB PHẲNG: CÀI ĐẶT
 addSidebarButton("Cài đặt", "⚙️")
-addScriptButton("Cài đặt", "Dark Dex Explorer", "Trình duyệt DataModel của game.", function()
-    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/infyield/darkdex/main/source.lua"))() end)
-end)
 
 local noclipActive = false
 local noclipConnection = nil
@@ -861,7 +891,7 @@ if workspace.CurrentCamera then
     workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
 end
 
--- ================= KÉO =================
+-- ================= KÉO MENU =================
 local menuDragging, menuDragStart, menuStartPos = false, nil, nil
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
