@@ -1,31 +1,191 @@
 -- ================================================
--- Tzuy Hub - Fixed + Main TikTok Tab + Scroll
+-- Tzuy Hub - Combined Anti-Pack Edition
 -- Credit TikTok: tuongduy8a4
 -- ================================================
 
 local getgenv = getgenv or function() return _G end
-local hookmetamethod = hookmetamethod or function(...) return ... end
+local hookmetamethod = hookmetamethod
+local getnamecallmethod = getnamecallmethod
+local newcclosure = newcclosure or function(f) return f end
+local checkcaller = checkcaller or function() return false end
 local sethiddenproperty = sethiddenproperty or function(...) return ... end
+
+-- ================= CLEANUP OLD INSTANCES =================
+if getgenv().TzuyAntiCleanup then pcall(getgenv().TzuyAntiCleanup) end
 
 if getgenv().TzuyHubLoaded then
     if getgenv().TzuyHubGui then pcall(function() getgenv().TzuyHubGui:Destroy() end) end
-    if game:GetService("CoreGui"):FindFirstChild("TzuyHubGui") then
-        game:GetService("CoreGui").TzuyHubGui:Destroy()
-    end
-    local pGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
-    if pGui and pGui:FindFirstChild("TzuyHubGui") then pGui.TzuyHubGui:Destroy() end
-    if gethui then
-        local ok, h = pcall(gethui)
-        if ok and h and h:FindFirstChild("TzuyHubGui") then h.TzuyHubGui:Destroy() end
-    end
+    if getgenv().TzuyAntiGui then pcall(function() getgenv().TzuyAntiGui:Destroy() end) end
+    pcall(function()
+        if game:GetService("CoreGui"):FindFirstChild("TzuyHubGui") then
+            game:GetService("CoreGui").TzuyHubGui:Destroy()
+        end
+    end)
+    pcall(function()
+        local pGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui")
+        if pGui and pGui:FindFirstChild("TzuyHubGui") then pGui.TzuyHubGui:Destroy() end
+    end)
+    pcall(function()
+        if gethui then
+            local ok, h = pcall(gethui)
+            if ok and h and h:FindFirstChild("TzuyHubGui") then h.TzuyHubGui:Destroy() end
+        end
+    end)
 end
 getgenv().TzuyHubLoaded = true
 
-local Players       = game:GetService("Players")
-local UIS           = game:GetService("UserInputService")
-local RunService    = game:GetService("RunService")
-local TweenService  = game:GetService("TweenService")
-local player        = Players.LocalPlayer
+local Players         = game:GetService("Players")
+local UIS             = game:GetService("UserInputService")
+local RunService      = game:GetService("RunService")
+local TweenService    = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+local GuiService      = game:GetService("GuiService")
+local VirtualUser     = game:GetService("VirtualUser")
+local player          = Players.LocalPlayer
+
+-- ================================================
+-- ANTI-PACK LOGIC (Fixed)
+-- ================================================
+local antiConfig = {
+    AntiKick   = true,
+    AntiIdle   = true,
+    AntiFling  = true,
+    AutoRejoin = true,
+    MaxRetry   = 5,
+}
+getgenv().TzuyAntiConfig = antiConfig
+
+local antiConnections = {}
+local function trackAnti(conn)
+    table.insert(antiConnections, conn)
+    return conn
+end
+
+-- ---- Anti-Kick (client-side __namecall) ----
+local kickHooked = false
+local oldNamecall = nil
+local function installKickHook()
+    if kickHooked or not hookmetamethod or not getnamecallmethod then return end
+    kickHooked = true
+    pcall(function()
+        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            if antiConfig.AntiKick and self == player then
+                local method = getnamecallmethod()
+                if (method == "Kick" or method == "kick") and not checkcaller() then
+                    warn("[Tzuy Anti] Đã chặn Kick client-side")
+                    return nil
+                end
+            end
+            return oldNamecall(self, ...)
+        end))
+    end)
+end
+installKickHook()
+
+-- ---- Anti-Idle ----
+trackAnti(player.Idled:Connect(function()
+    if antiConfig.AntiIdle then
+        pcall(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new(0, 0))
+        end)
+    end
+end))
+
+-- ---- Anti-Fling (optimized) ----
+local FLING_SPEED = 200
+local lastScan = 0
+trackAnti(RunService.Heartbeat:Connect(function(dt)
+    if not antiConfig.AntiFling then return end
+    local char = player.Character
+    local root = char and char:FindFirstChild("HumanoidRootPart")
+    if root then
+        local vel = root.AssemblyLinearVelocity
+        local ang = root.AssemblyAngularVelocity
+        if vel.Magnitude > FLING_SPEED or ang.Magnitude > FLING_SPEED then
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end
+    end
+    lastScan += dt
+    if lastScan < 0.5 then return end
+    lastScan = 0
+    for _, other in ipairs(Players:GetPlayers()) do
+        if other ~= player and other.Character then
+            for _, name in ipairs({"HumanoidRootPart", "UpperTorso", "Torso", "Head"}) do
+                local part = other.Character:FindFirstChild(name)
+                if part and part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
+end))
+
+-- ---- Auto-Rejoin ----
+local rejoining = false
+local retryCount = 0
+local function doRejoin(reason)
+    if not antiConfig.AutoRejoin or rejoining then return end
+    if retryCount >= antiConfig.MaxRetry then
+        warn("[Tzuy Anti] Đã thử " .. retryCount .. " lần, dừng. Lý do: " .. tostring(reason))
+        return
+    end
+    rejoining = true
+    retryCount += 1
+    local waitTime = math.min(2 * retryCount, 12)
+    task.delay(waitTime, function()
+        local ok = false
+        if retryCount == 1 and game.JobId ~= "" then
+            ok = pcall(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player)
+            end)
+        end
+        if not ok then
+            pcall(function() TeleportService:Teleport(game.PlaceId, player) end)
+        end
+        task.wait(5)
+        rejoining = false
+        task.delay(60, function() retryCount = 0 end)
+    end)
+end
+
+local KICK_KEYWORDS = { "kick", "disconnect", "teleport", "permission", "access", "quyền", "lost connection", "mất kết nối" }
+local function isKickMessage(msg)
+    if not msg or msg == "" then return false end
+    local lower = string.lower(msg)
+    for _, kw in ipairs(KICK_KEYWORDS) do
+        if string.find(lower, kw, 1, true) then return true end
+    end
+    return false
+end
+
+trackAnti(TeleportService.TeleportInitFailed:Connect(function(p, _, msg)
+    if p == player then doRejoin("TeleportInitFailed: " .. tostring(msg)) end
+end))
+
+pcall(function()
+    trackAnti(GuiService.ErrorMessageChanged:Connect(function(msg)
+        if isKickMessage(msg) then doRejoin("Error: " .. msg) end
+    end))
+end)
+
+trackAnti(player.CharacterAdded:Connect(function()
+    retryCount = 0
+    rejoining = false
+end))
+
+-- ---- Anti cleanup ----
+local function cleanupAnti()
+    for _, c in ipairs(antiConnections) do
+        pcall(function() c:Disconnect() end)
+    end
+    table.clear(antiConnections)
+    if oldNamecall then
+        pcall(function() hookmetamethod(game, "__namecall", oldNamecall) end)
+    end
+end
+getgenv().TzuyAntiCleanup = cleanupAnti
 
 -- ================= MÀU CHỮ ==================
 local TEXT_BLACK       = Color3.fromRGB(15, 15, 20)
@@ -48,7 +208,7 @@ if not playerGui then
     end
 end
 
-local IMAGE_ICON = "rbxthumb://type=Asset&id=116294082135305&w=150&h=150"
+local IMAGE_ICON  = "rbxthumb://type=Asset&id=116294082135305&w=150&h=150"
 local TIKTOK_ICON = "rbxassetid://128441949775022"
 
 local screenGui          = Instance.new("ScreenGui")
@@ -76,7 +236,7 @@ local function playSfx(soundId, volume, pitch)
     end)
 end
 
--- ================== NÚT BẤM NGOÀI (45x45) ==================
+-- ================== NÚT BẤM NGOÀI ==================
 local button              = Instance.new("ImageButton")
 button.Name               = "ToggleButton"
 button.Size               = UDim2.new(0, 45, 0, 45)
@@ -94,9 +254,7 @@ btnStroke.Color       = TEXT_BLUE_BRIGHT
 btnStroke.Thickness   = 1.8
 btnStroke.Parent      = button
 
-local btnCorner             = Instance.new("UICorner")
-btnCorner.CornerRadius      = UDim.new(0, 10)
-btnCorner.Parent            = button
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
 
 -- ================= KHUNG MENU CHÍNH ==================
 local mainFrame                 = Instance.new("Frame")
@@ -115,9 +273,7 @@ mainFrame.Parent                = screenGui
 local uiScale       = Instance.new("UIScale")
 uiScale.Parent      = mainFrame
 
-local mainCorner             = Instance.new("UICorner")
-mainCorner.CornerRadius      = UDim.new(0, 16)
-mainCorner.Parent            = mainFrame
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 16)
 
 local mainStroke          = Instance.new("UIStroke")
 mainStroke.Color          = Color3.fromRGB(60, 65, 80)
@@ -152,7 +308,6 @@ searchFrame.Name                    = "SearchFrame"
 searchFrame.Size                    = UDim2.new(0, 320, 0, 34)
 searchFrame.Position                = UDim2.new(0, 235, 0.5, -17)
 searchFrame.BackgroundColor3        = Color3.fromRGB(30, 35, 45)
-searchFrame.BackgroundTransparency  = 0
 searchFrame.BorderSizePixel         = 0
 searchFrame.ZIndex                  = 52
 searchFrame.Parent                  = header
@@ -223,35 +378,33 @@ local tabButtons = {}
 local activeTab = nil
 local allScriptButtons = {}
 
--- Mỗi tab là một ScrollingFrame: cuộn lên/xuống bằng chuột, cảm ứng hoặc thanh cuộn
 local function createTabContent(name)
-    local sf                        = Instance.new("ScrollingFrame")
-    sf.Name                         = name .. "Content"
-    sf.Size                         = UDim2.new(1, 0, 1, 0)
-    sf.BackgroundTransparency       = 1
-    sf.BorderSizePixel              = 0
-    sf.Visible                      = false
-    sf.ZIndex                       = 52
-    sf.CanvasSize                   = UDim2.new(0, 0, 0, 0)
-    sf.AutomaticCanvasSize          = Enum.AutomaticSize.Y
-    sf.ScrollingDirection           = Enum.ScrollingDirection.Y
-    sf.ScrollBarThickness           = 4
-    sf.ScrollBarImageColor3         = Color3.fromRGB(0, 140, 255)
-    sf.ScrollBarImageTransparency   = 0.1
-    sf.ScrollingEnabled             = true
-    sf.ElasticBehavior              = Enum.ElasticBehavior.WhenScrollable
-    sf.Parent                       = contentContainer
+    local sf = Instance.new("ScrollingFrame")
+    sf.Name                   = name .. "Content"
+    sf.Size                   = UDim2.new(1, 0, 1, 0)
+    sf.BackgroundTransparency = 1
+    sf.BorderSizePixel        = 0
+    sf.Visible                = false
+    sf.ZIndex                 = 52
+    sf.CanvasSize             = UDim2.new(0, 0, 0, 0)
+    sf.AutomaticCanvasSize    = Enum.AutomaticSize.Y
+    sf.ScrollingDirection     = Enum.ScrollingDirection.Y
+    sf.ScrollBarThickness     = 4
+    sf.ScrollBarImageColor3   = Color3.fromRGB(0, 140, 255)
+    sf.ScrollBarImageTransparency = 0.1
+    sf.ElasticBehavior        = Enum.ElasticBehavior.WhenScrollable
+    sf.Parent                 = contentContainer
 
-    local layout         = Instance.new("UIListLayout")
-    layout.Padding       = UDim.new(0, 8)
-    layout.SortOrder     = Enum.SortOrder.LayoutOrder
-    layout.Parent        = sf
+    local layout        = Instance.new("UIListLayout")
+    layout.Padding      = UDim.new(0, 8)
+    layout.SortOrder    = Enum.SortOrder.LayoutOrder
+    layout.Parent       = sf
 
-    local padding            = Instance.new("UIPadding")
-    padding.PaddingTop       = UDim.new(0, 4)
-    padding.PaddingBottom    = UDim.new(0, 10)
-    padding.PaddingRight     = UDim.new(0, 8)
-    padding.Parent           = sf
+    local padding       = Instance.new("UIPadding")
+    padding.PaddingTop    = UDim.new(0, 4)
+    padding.PaddingBottom = UDim.new(0, 10)
+    padding.PaddingRight  = UDim.new(0, 8)
+    padding.Parent        = sf
 
     tabs[name] = sf
     return sf
@@ -266,25 +419,24 @@ local function switchTab(name)
     end
     for btnName, btn in pairs(tabButtons) do
         if btnName == name then
-            btn.BackgroundColor3     = Color3.fromRGB(0, 140, 255)
+            btn.BackgroundColor3       = Color3.fromRGB(0, 140, 255)
             btn.BackgroundTransparency = 0.15
-            btn.TextColor3           = TEXT_WHITE
+            btn.TextColor3             = TEXT_WHITE
         else
             if btn:GetAttribute("IsSubTab") then
-                btn.BackgroundColor3     = Color3.fromRGB(35, 40, 50)
+                btn.BackgroundColor3       = Color3.fromRGB(35, 40, 50)
                 btn.BackgroundTransparency = 0.3
-                btn.TextColor3           = TEXT_GREY_LIGHT
+                btn.TextColor3             = TEXT_GREY_LIGHT
             else
-                btn.BackgroundColor3     = Color3.fromRGB(255, 255, 255)
+                btn.BackgroundColor3       = Color3.fromRGB(255, 255, 255)
                 btn.BackgroundTransparency = 0.85
-                btn.TextColor3           = TEXT_BLACK
+                btn.TextColor3             = TEXT_BLACK
             end
         end
     end
     activeTab = name
 end
 
--- Tab phẳng
 local function addSidebarButton(name, iconText)
     local btn                     = Instance.new("TextButton")
     btn.Name                      = name .. "TabBtn"
@@ -299,15 +451,12 @@ local function addSidebarButton(name, iconText)
     btn.ZIndex                    = 52
     btn.AutoButtonColor           = false
 
-    local corner              = Instance.new("UICorner")
-    corner.CornerRadius       = UDim.new(0, 10)
-    corner.Parent             = btn
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
-    local btnStroke2          = Instance.new("UIStroke")
-    btnStroke2.Color          = Color3.fromRGB(0, 0, 0)
-    btnStroke2.Transparency   = 0.75
-    btnStroke2.Thickness      = 1
-    btnStroke2.Parent         = btn
+    local s = Instance.new("UIStroke")
+    s.Color          = Color3.fromRGB(0, 0, 0)
+    s.Transparency   = 0.75
+    s.Parent         = btn
 
     btn.MouseEnter:Connect(function()
         if activeTab ~= name then
@@ -325,12 +474,11 @@ local function addSidebarButton(name, iconText)
         switchTab(name)
     end)
 
-    btn.Parent          = sidebar
-    tabButtons[name]    = btn
+    btn.Parent       = sidebar
+    tabButtons[name] = btn
     createTabContent(name)
 end
 
--- Category mẹ (accordion)
 local function addCategory(name, iconText)
     local btn                     = Instance.new("TextButton")
     btn.Name                      = name .. "Category"
@@ -366,47 +514,39 @@ local function addCategory(name, iconText)
     arrow.Parent                  = btn
 
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-    local stroke              = Instance.new("UIStroke")
-    stroke.Color              = Color3.fromRGB(0, 0, 0)
-    stroke.Transparency       = 0.75
-    stroke.Parent             = btn
+    local s = Instance.new("UIStroke")
+    s.Color = Color3.fromRGB(0, 0, 0); s.Transparency = 0.75; s.Parent = btn
 
     btn.Parent = sidebar
 
-    local container                = Instance.new("Frame")
-    container.Name                 = name .. "Container"
-    container.Size                 = UDim2.new(1, 0, 0, 0)
-    container.AutomaticSize        = Enum.AutomaticSize.Y
+    local container                  = Instance.new("Frame")
+    container.Name                   = name .. "Container"
+    container.Size                   = UDim2.new(1, 0, 0, 0)
+    container.AutomaticSize          = Enum.AutomaticSize.Y
     container.BackgroundTransparency = 1
-    container.ZIndex               = 51
-    container.Parent               = sidebar
+    container.ZIndex                 = 51
+    container.Parent                 = sidebar
 
-    local cLayout           = Instance.new("UIListLayout")
-    cLayout.Padding         = UDim.new(0, 4)
-    cLayout.SortOrder       = Enum.SortOrder.LayoutOrder
-    cLayout.Parent          = container
+    local cLayout        = Instance.new("UIListLayout")
+    cLayout.Padding      = UDim.new(0, 4)
+    cLayout.SortOrder    = Enum.SortOrder.LayoutOrder
+    cLayout.Parent       = container
 
-    local cPadding          = Instance.new("UIPadding")
-    cPadding.PaddingLeft    = UDim.new(0, 10)
-    cPadding.Parent         = container
+    local cPadding       = Instance.new("UIPadding")
+    cPadding.PaddingLeft = UDim.new(0, 10)
+    cPadding.Parent      = container
 
     local isOpen = true
     btn.MouseButton1Click:Connect(function()
         playSfx(SFX_CLICK, 0.3)
         isOpen = not isOpen
         container.Visible = isOpen
-
-        if isOpen then
-            arrow.Text = "×"
-        else
-            arrow.Text = "+"
-        end
+        arrow.Text = isOpen and "×" or "+"
     end)
 
     return container
 end
 
--- Sub-tab con
 local function addSubTabButton(parentContainer, name, iconText)
     local btn                     = Instance.new("TextButton")
     btn.Name                      = name .. "TabBtn"
@@ -430,12 +570,11 @@ local function addSubTabButton(parentContainer, name, iconText)
         switchTab(name)
     end)
 
-    btn.Parent        = parentContainer
-    tabButtons[name]  = btn
+    btn.Parent       = parentContainer
+    tabButtons[name] = btn
     createTabContent(name)
 end
 
--- Nút script thường
 local function addScriptButton(tabName, title, desc, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -451,11 +590,8 @@ local function addScriptButton(tabName, title, desc, callback)
 
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
-    local stroke              = Instance.new("UIStroke")
-    stroke.Color              = Color3.fromRGB(0, 0, 0)
-    stroke.Transparency       = 0.7
-    stroke.Thickness          = 1
-    stroke.Parent             = btn
+    local s = Instance.new("UIStroke")
+    s.Color = Color3.fromRGB(0, 0, 0); s.Transparency = 0.7; s.Thickness = 1; s.Parent = btn
 
     local tLbl                    = Instance.new("TextLabel")
     tLbl.Size                     = UDim2.new(1, -30, 1, 0)
@@ -472,25 +608,24 @@ local function addScriptButton(tabName, title, desc, callback)
     tLbl.ZIndex                   = 54
     tLbl.Parent                   = btn
 
-    local itemData = {
+    table.insert(allScriptButtons, {
         Button  = btn,
-        Stroke  = stroke,
+        Stroke  = s,
         Title   = string.lower(title),
         Desc    = string.lower(desc or ""),
         TabName = tabName,
-    }
-    table.insert(allScriptButtons, itemData)
+    })
 
     btn.MouseEnter:Connect(function()
         if not btn:GetAttribute("Active") then
             TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.7 }):Play()
-            TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
+            TweenService:Create(s, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
         end
     end)
     btn.MouseLeave:Connect(function()
         if not btn:GetAttribute("Active") then
             TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.82 }):Play()
-            TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
+            TweenService:Create(s, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
         end
     end)
 
@@ -501,7 +636,7 @@ local function addScriptButton(tabName, title, desc, callback)
             if item.TabName == tabName and item.IsToggle then
                 item.Button:SetAttribute("Active", false)
                 TweenService:Create(item.Button, TweenInfo.new(0.2), {
-                    BackgroundColor3     = Color3.fromRGB(255, 255, 255),
+                    BackgroundColor3 = Color3.fromRGB(255, 255, 255),
                     BackgroundTransparency = 0.82,
                 }):Play()
                 TweenService:Create(item.Stroke, TweenInfo.new(0.2), { Transparency = 0.7 }):Play()
@@ -510,19 +645,19 @@ local function addScriptButton(tabName, title, desc, callback)
 
         btn:SetAttribute("Active", true)
         TweenService:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3     = Color3.fromRGB(0, 140, 255),
+            BackgroundColor3 = Color3.fromRGB(0, 140, 255),
             BackgroundTransparency = 0.15,
         }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), { Transparency = 0.05 }):Play()
+        TweenService:Create(s, TweenInfo.new(0.2), { Transparency = 0.05 }):Play()
 
         task.spawn(function()
-            local flash                     = Instance.new("Frame")
-            flash.Size                      = UDim2.new(1, 0, 1, 0)
-            flash.BackgroundColor3          = Color3.fromRGB(255, 255, 255)
-            flash.BackgroundTransparency    = 0.7
-            flash.BorderSizePixel           = 0
-            flash.ZIndex                    = 60
-            flash.Parent                    = btn
+            local flash                  = Instance.new("Frame")
+            flash.Size                   = UDim2.new(1, 0, 1, 0)
+            flash.BackgroundColor3       = Color3.fromRGB(255, 255, 255)
+            flash.BackgroundTransparency = 0.7
+            flash.BorderSizePixel        = 0
+            flash.ZIndex                 = 60
+            flash.Parent                 = btn
             Instance.new("UICorner", flash).CornerRadius = UDim.new(0, 10)
             TweenService:Create(flash, TweenInfo.new(0.35), { BackgroundTransparency = 1 }):Play()
             task.delay(0.4, function() if flash and flash.Parent then flash:Destroy() end end)
@@ -534,7 +669,6 @@ local function addScriptButton(tabName, title, desc, callback)
     btn.Parent = tabFrame
 end
 
--- Toggle button
 local function addToggleButton(tabName, title, desc, initialState, callback)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -552,11 +686,8 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
 
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
-    local stroke              = Instance.new("UIStroke")
-    stroke.Color              = Color3.fromRGB(0, 0, 0)
-    stroke.Transparency       = 0.7
-    stroke.Thickness          = 1
-    stroke.Parent             = btn
+    local s = Instance.new("UIStroke")
+    s.Color = Color3.fromRGB(0, 0, 0); s.Transparency = 0.7; s.Thickness = 1; s.Parent = btn
 
     local tLbl                    = Instance.new("TextLabel")
     tLbl.Size                     = UDim2.new(1, -90, 1, 0)
@@ -592,21 +723,21 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
     Instance.new("UICorner", thumb).CornerRadius = UDim.new(1, 0)
 
     table.insert(allScriptButtons, {
-        Button  = btn,
-        Stroke  = stroke,
-        Title   = string.lower(title),
-        Desc    = string.lower(desc or ""),
-        TabName = tabName,
+        Button   = btn,
+        Stroke   = s,
+        Title    = string.lower(title),
+        Desc     = string.lower(desc or ""),
+        TabName  = tabName,
         IsToggle = true,
     })
 
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.7 }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
+        TweenService:Create(s, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
     end)
     btn.MouseLeave:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.82 }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
+        TweenService:Create(s, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
     end)
 
     btn.MouseButton1Click:Connect(function()
@@ -626,7 +757,6 @@ local function addToggleButton(tabName, title, desc, initialState, callback)
     btn.Parent = tabFrame
 end
 
--- 🎵 Thẻ credit TikTok
 local function addTikTokCard(tabName)
     local tabFrame = tabs[tabName]
     if not tabFrame then return end
@@ -643,11 +773,8 @@ local function addTikTokCard(tabName)
 
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
 
-    local stroke              = Instance.new("UIStroke")
-    stroke.Color              = Color3.fromRGB(0, 0, 0)
-    stroke.Transparency       = 0.7
-    stroke.Thickness          = 1
-    stroke.Parent             = btn
+    local s = Instance.new("UIStroke")
+    s.Color = Color3.fromRGB(0, 0, 0); s.Transparency = 0.7; s.Thickness = 1; s.Parent = btn
 
     local iIcon               = Instance.new("ImageLabel")
     iIcon.Size                = UDim2.new(0, 45, 0, 45)
@@ -657,11 +784,7 @@ local function addTikTokCard(tabName)
     iIcon.Image               = TIKTOK_ICON
     iIcon.ScaleType           = Enum.ScaleType.Fit
     iIcon.ZIndex              = 54
-
-    local iconCorner          = Instance.new("UICorner")
-    iconCorner.CornerRadius   = UDim.new(0, 12)
-    iconCorner.Parent         = iIcon
-
+    Instance.new("UICorner", iIcon).CornerRadius = UDim.new(0, 12)
     iIcon.Parent              = btn
 
     local iTitle              = Instance.new("TextLabel")
@@ -679,7 +802,6 @@ local function addTikTokCard(tabName)
     iTitle.Parent             = btn
 
     local iDesc               = Instance.new("TextLabel")
-    iDesc.Name                = "Desc"
     iDesc.Size                = UDim2.new(1, -90, 0, 22)
     iDesc.Position            = UDim2.new(0, 80, 0, 55)
     iDesc.BackgroundTransparency = 1
@@ -693,11 +815,11 @@ local function addTikTokCard(tabName)
 
     btn.MouseEnter:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.7 }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
+        TweenService:Create(s, TweenInfo.new(0.18), { Transparency = 0.4 }):Play()
     end)
     btn.MouseLeave:Connect(function()
         TweenService:Create(btn, TweenInfo.new(0.18), { BackgroundTransparency = 0.82 }):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
+        TweenService:Create(s, TweenInfo.new(0.18), { Transparency = 0.7 }):Play()
     end)
 
     btn.MouseButton1Click:Connect(function()
@@ -737,7 +859,7 @@ addSubTabButton(bfContainer, "Main Blox Fruit", "⚔️")
 addSubTabButton(bfContainer, "Kaitun", "🐉")
 addSubTabButton(bfContainer, "Hop Server", "🌐")
 
--- ⚔️ NỘI DUNG TAB MAIN BLOX FRUIT
+-- ⚔️ Main Blox Fruit
 addScriptButton("Main Blox Fruit", "Redz Hub", "Hub đa chức năng Blox Fruits.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/bloxfruitsnokey/Redz/refs/heads/main/Redz/halloween.luau"))() end)
 end)
@@ -757,16 +879,11 @@ addScriptButton("Main Blox Fruit", "Tay Hub Premium", "Hub Premium Blox Fruits."
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/VTDROBLOX/Animehub/refs/heads/main/Tayhub-PREMIUM.lua"))() end)
 end)
 addScriptButton("Main Blox Fruit", "Arvyn", "Hub đa chức năng Blox Fruits (Arvyn).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://api.luasentry.com/api/scripts/loader/e664cbd4c071c95381797367d7444a7b.lua"))()
-    end)
+    pcall(function() loadstring(game:HttpGet("https://api.luasentry.com/api/scripts/loader/e664cbd4c071c95381797367d7444a7b.lua"))() end)
 end)
 addScriptButton("Main Blox Fruit", "LongHiHi", "Hub đa chức năng Blox Fruits (LongHiHi).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyHub/refs/heads/main/LongHiHi"))()
-    end)
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/TzuyHub/refs/heads/main/LongHiHi"))() end)
 end)
-
 addScriptButton("Main Blox Fruit", "Scythe (Crack Banana)", "Script Scythe Crack Banana (loadstring).", function()
     task.spawn(function()
         pcall(function()
@@ -774,45 +891,37 @@ addScriptButton("Main Blox Fruit", "Scythe (Crack Banana)", "Script Scythe Crack
         end)
     end)
 end)
+addScriptButton("Main Blox Fruit", "Night Hub", "Hub đa chức năng Blox Fruits (Night Hub).", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/MainBF_Z.luau"))() end)
+end)
 
--- 🐉 NỘI DUNG TAB KAITUN
+-- 🐉 Kaitun
 addScriptButton("Kaitun", "Kaitun Halloween", "Auto farm Kaitun mùa Halloween.", function()
     pcall(function() loadstring(game:HttpGet("https://pastefy.app/yZsSI5Xg/raw"))() end)
 end)
 addScriptButton("Kaitun", "Kaitun Halloween RealKid", "Kaitun RealKid Siêu BÁ KHÍ (Key).", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/-Kaitun-Halloween-RealKid-"))() end)
 end)
-addScriptButton("Kaitun", "Kaitun RealKid", "Auto farm Kaitun RealKid (tối ưu FPS, auto quest, hop trái).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-RealKid-Farm"))()
-    end)
+addScriptButton("Kaitun", "Kaitun RealKid", "Auto farm Kaitun RealKid.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-RealKid-Farm"))() end)
 end)
-addScriptButton("Kaitun", "Kaitun Arvyn", "Auto farm Kaitun Arvyn (tối ưu, tự động quest, hop trái).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-Arvyn-Farm"))()
-    end)
+addScriptButton("Kaitun", "Kaitun Arvyn", "Auto farm Kaitun Arvyn.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-Arvyn-Farm"))() end)
 end)
-
-addScriptButton("Kaitun", "Kaitun Race v4 RealKid", "Auto farm Kaitun Race v4 (RealKid).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-RaceV4-RealKid"))()
-    end)
+addScriptButton("Kaitun", "Kaitun Race v4 RealKid", "Auto farm Kaitun Race v4.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-RaceV4-RealKid"))() end)
 end)
-addScriptButton("Kaitun", "Kaitun Leviathan RealKid", "Auto farm Kaitun Leviathan (RealKid).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-LeviaThan-RealKid"))()
-    end)
+addScriptButton("Kaitun", "Kaitun Leviathan RealKid", "Auto farm Kaitun Leviathan.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-LeviaThan-RealKid"))() end)
 end)
-addScriptButton("Kaitun", "Kaitun Dungeon", "Auto farm Kaitun Dungeon (RealKid).", function()
-    pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-Dungeon-RealKid"))()
-    end)
+addScriptButton("Kaitun", "Kaitun Dungeon", "Auto farm Kaitun Dungeon.", function()
+    pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/TzuyHub/Kaitun-Tzuy/refs/heads/main/Kaitun-Dungeon-RealKid"))() end)
 end)
 
--- 🌐 NỘI DUNG TAB HOP SERVER
+-- 🌐 Hop Server
 addScriptButton("Hop Server", "Teddy Hop", "Auto hop server.", function()
     pcall(function()
-        repeat task.wait() until game:IsLoaded() and game:GetService("Players") and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+        repeat task.wait() until game:IsLoaded() and player and player:FindFirstChild("PlayerGui")
         loadstring(game:HttpGet("https://raw.githubusercontent.com/teddyhubdev/diepvy/refs/heads/main/HopBoss.lua"))()
     end)
 end)
@@ -823,14 +932,11 @@ addScriptButton("Hop Server", "Night Hop (Key)", "Auto hop server.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/HopScript.luau"))() end)
 end)
 
--- 🥚 TAB PHẲNG: STEAL A EGG
+-- 🥚 Steal a Egg
 addSidebarButton("Steal a Egg", "🥚")
-
--- Chilli X Venyx v10 (đứng đầu tab)
-addScriptButton("Steal a Egg", "Chilli X Venyx v10", "Tự động trộm trứng (phiên bản v10 mới).", function()
+addScriptButton("Steal a Egg", "Chilli X Venyx v10", "Tự động trộm trứng (v10 mới).", function()
     pcall(function() loadstring(game:HttpGet("https://id.tomroblox.com/raw/kairoblox/chilli-x-venyx-v10-new-10500"))() end)
 end)
-
 addScriptButton("Steal a Egg", "RealKid", "Tự động trộm trứng.", function()
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/realkidhub/Games/refs/heads/main/RealKidEgg.lua"))() end)
 end)
@@ -841,12 +947,13 @@ addScriptButton("Steal a Egg", "Night Hub", "Tự động trộm trứng.", func
     pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/WhiteX1208/Scripts/refs/heads/main/StealAnEggs.luau"))() end)
 end)
 
--- ⚙️ TAB PHẲNG: CÀI ĐẶT
+-- ⚙️ Cài đặt (Noclip + Anti-Pack)
 addSidebarButton("Cài đặt", "⚙️")
 
+-- Noclip
 local noclipActive = false
 local noclipConnection = nil
-local function toggleNoclipState(state)
+addToggleButton("Cài đặt", "Toggle Noclip", "Bật/Tắt đi xuyên màn", false, function(state)
     noclipActive = state
     if noclipActive then
         if not noclipConnection then
@@ -866,9 +973,28 @@ local function toggleNoclipState(state)
             noclipConnection = nil
         end
     end
-end
-addToggleButton("Cài đặt", "Toggle Noclip", "Bật/Tắt đi xuyên màn", false, function(state)
-    toggleNoclipState(state)
+end)
+
+-- Anti-Kick
+addToggleButton("Cài đặt", "Anti-Kick (Client)", "Chặn Kick từ script client-side (không chặn được kick từ server)", antiConfig.AntiKick, function(state)
+    antiConfig.AntiKick = state
+    if state then installKickHook() end
+end)
+
+-- Anti-Idle
+addToggleButton("Cài đặt", "Anti-Idle", "Không bị kick vì đứng yên / AFK", antiConfig.AntiIdle, function(state)
+    antiConfig.AntiIdle = state
+end)
+
+-- Anti-Fling
+addToggleButton("Cài đặt", "Anti-Fling", "Chống văng, chặn va chạm người khác", antiConfig.AntiFling, function(state)
+    antiConfig.AntiFling = state
+end)
+
+-- Auto-Rejoin
+addToggleButton("Cài đặt", "Auto-Rejoin", "Tự vào lại khi bị văng / lỗi teleport", antiConfig.AutoRejoin, function(state)
+    antiConfig.AutoRejoin = state
+    if not state then retryCount = 0; rejoining = false end
 end)
 
 -- Tab mặc định
@@ -887,17 +1013,25 @@ local function updateScale()
     end
 end
 updateScale()
-if workspace.CurrentCamera then
-    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+
+local function bindCamera(cam)
+    if cam then
+        cam:GetPropertyChangedSignal("ViewportSize"):Connect(updateScale)
+        updateScale()
+    end
 end
+bindCamera(workspace.CurrentCamera)
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    bindCamera(workspace.CurrentCamera)
+end)
 
 -- ================= KÉO MENU =================
 local menuDragging, menuDragStart, menuStartPos = false, nil, nil
 header.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        menuDragging = true
+        menuDragging  = true
         menuDragStart = input.Position
-        menuStartPos = mainFrame.Position
+        menuStartPos  = mainFrame.Position
     end
 end)
 
@@ -915,9 +1049,9 @@ UIS.InputChanged:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
         if menuDragging and workspace.CurrentCamera then
             local delta = input.Position - menuDragStart
-            local newX = menuStartPos.X.Offset + delta.X
-            local newY = menuStartPos.Y.Offset + delta.Y
-            local vp = workspace.CurrentCamera.ViewportSize
+            local newX  = menuStartPos.X.Offset + delta.X
+            local newY  = menuStartPos.Y.Offset + delta.Y
+            local vp    = workspace.CurrentCamera.ViewportSize
             newX = math.clamp(newX, -mainFrame.AbsoluteSize.X / 2 + 100, vp.X - 100)
             newY = math.clamp(newY, -mainFrame.AbsoluteSize.Y / 2 + 50,  vp.Y - 50)
             mainFrame.Position = UDim2.new(menuStartPos.X.Scale, newX, menuStartPos.Y.Scale, newY)
@@ -971,14 +1105,12 @@ end
 button.MouseButton1Click:Connect(function()
     if wasDragged then wasDragged = false; return end
     playSfx(SFX_WHOOSH, 0.4)
-    if mainFrame.Visible then
-        hideMenu()
-    else
-        showMenu()
-    end
+    if mainFrame.Visible then hideMenu() else showMenu() end
 end)
 
 task.spawn(function()
     task.wait(0.1)
     showMenu()
 end)
+
+print("[Tzuy Hub] Đã tải - Anti-Pack tích hợp trong tab Cài đặt.")
